@@ -1,0 +1,48 @@
+Wrote 1000 test validation samples to /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test_manifests/coaf_dataset_test_1k
+Wed May 27 17:13:53 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 570.158.01             Driver Version: 570.158.01     CUDA Version: 12.8     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA H800                    On  |   00000000:9D:00.0 Off |                    0 |
+| N/A   24C    P0             70W /  700W |       0MiB /  81559MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v4_depth_rgb_256_causal/sample_000.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v4_depth_rgb_256_causal/sample_001.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v4_depth_rgb_256_causal/sample_002.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v4_depth_rgb_256_causal/sample_003.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v4_depth_rgb_256_causal/sample_004.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v4_depth_rgb_256_causal/sample_005.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v4_depth_rgb_256_causal/sample_006.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v4_depth_rgb_256_causal/sample_007.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v4_depth_rgb_256_causal/sample_008.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v4_depth_rgb_256_causal/sample_009.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v4_depth_rgb_256_causal/sample_010.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v4_depth_rgb_256_causal/sample_011.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v4_depth_rgb_256_causal/sample_012.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v4_depth_rgb_256_causal/sample_013.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v4_depth_rgb_256_causal/sample_014.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v4_depth_rgb_256_causal/sample_015.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v4_depth_rgb_256_causal/sample_016.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v4_depth_rgb_256_causal/sample_017.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v4_depth_rgb_256_causal/sample_018.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v4_depth_rgb_256_causal/sample_019.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v4_depth_rgb_256_causal/sample_020.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v4_depth_rgb_256_causal/sample_021.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v4_depth_rgb_256_causal/sample_022.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v4_depth_rgb_256_causal/sample_023.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v4_depth_rgb_256_causal/sample_024.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v4_depth_rgb_256_causal/sample_025.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v4_depth_rgb_256_causal/sample_026.mp4

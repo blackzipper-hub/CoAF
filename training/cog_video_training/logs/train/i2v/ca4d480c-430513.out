@@ -1,0 +1,47 @@
+Fri May 29 18:19:52 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 570.158.01             Driver Version: 570.158.01     CUDA Version: 12.8     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA H800                    On  |   00000000:9D:00.0 Off |                    0 |
+| N/A   32C    P0             71W /  700W |       0MiB /  81559MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+|   1  NVIDIA H800                    On  |   00000000:C3:00.0 Off |                    0 |
+| N/A   22C    P0             70W /  700W |       0MiB /  81559MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+|   2  NVIDIA H800                    On  |   00000000:D1:00.0 Off |                    0 |
+| N/A   35C    P0             70W /  700W |       0MiB /  81559MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+|   3  NVIDIA H800                    On  |   00000000:DF:00.0 Off |                    0 |
+| N/A   28C    P0             70W /  700W |       0MiB /  81559MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+Training launch: 4 GPU(s), per-GPU batch=1, grad_accum=8, effective batch=32
+===== Memory before training =====
+memory_allocated=20.153 GB
+max_memory_allocated=20.153 GB
+max_memory_reserved=20.795 GB
+***** Running training *****
+  Num trainable parameters = 132120576
+  Num examples = 436
+  Num batches each epoch = 109
+  Num epochs = 1072
+  Instantaneous batch size per device = 1
+  Total train batch size (w. parallel, distributed & accumulation) = 32
+  Gradient accumulation steps = 8
+  Total optimization steps = 15000
+Resuming from checkpoint checkpoint-1000

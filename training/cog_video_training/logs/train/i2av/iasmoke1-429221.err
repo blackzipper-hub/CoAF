@@ -1,0 +1,61 @@
+05/27/2026 12:09:23 - INFO - __main__ - [RANK 0] Distributed environment: NO
+Num processes: 1
+Process index: 0
+Local process index: 0
+Device: cuda
+
+Mixed precision type: bf16
+
+Loading weights:   0%|          | 0/219 [00:00<?, ?it/s]Loading weights: 100%|██████████| 219/219 [00:00<00:00, 11458.27it/s]
+Instantiating CogVideoXTransformer3DModel model under default dtype torch.bfloat16.
+{'ofs_embed_dim', 'patch_size_t', 'patch_bias'} was not found in config. Values will be initialized to default values.
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00, 69.32it/s]
+All model checkpoint weights were used when initializing CogVideoXTransformer3DModel.
+
+All the weights of CogVideoXTransformer3DModel were initialized from the model checkpoint at /project/llmsvgen/sunkai/robomaster_3d/CoAF/training/cog_video_training/models/CogVideoX-5b-I2V.
+If your task is similar to the task the model of the checkpoint was trained on, you can already use CogVideoXTransformer3DModel for predictions without further training.
+All model checkpoint weights were used when initializing AutoencoderKLCogVideoX.
+
+All the weights of AutoencoderKLCogVideoX were initialized from the model checkpoint at /project/llmsvgen/sunkai/robomaster_3d/CoAF/training/cog_video_training/models/CogVideoX-5b-I2V.
+If your task is similar to the task the model of the checkpoint was trained on, you can already use AutoencoderKLCogVideoX for predictions without further training.
+/project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/finetrainers/examples/_legacy/training/cogvideox/cogvideox_image_to_video_lora_i2av.py:464: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  norm_stats = torch.load(args.state_norm_stats, map_location="cpu")
+05/27/2026 12:09:24 - INFO - __main__ - [RANK 0] Enabled temporal causal attention: CausalAttentionMeta(text_seq_length=230, num_latent_frames=13, patches_per_frame=256, num_pixel_frames=49, pixel_height=256, pixel_width=256, patch_size=2, vae_scale_factor_spatial=8, sequence_length=3662, sa_per_frame=8, s0_cond_tokens=4, tokens_per_step=264, enable_state_action=True)
+Steps:   0%|          | 0/10 [00:00<?, ?it/s]Steps:  10%|█         | 1/10 [00:02<00:19,  2.14s/it]Steps:  10%|█         | 1/10 [00:02<00:19,  2.14s/it, L_action=0.305, L_consistency=0.0457, L_sa=1.89, L_state=1.56, gradient_norm_after_clip=1.01, gradient_norm_before_clip=2.18, loss=0.484, loss_video=0.295, lr=5e-7]Steps:  20%|██        | 2/10 [00:03<00:14,  1.76s/it, L_action=0.305, L_consistency=0.0457, L_sa=1.89, L_state=1.56, gradient_norm_after_clip=1.01, gradient_norm_before_clip=2.18, loss=0.484, loss_video=0.295, lr=5e-7]Steps:  20%|██        | 2/10 [00:03<00:14,  1.76s/it, L_action=0.219, L_consistency=0.0251, L_sa=1.62, L_state=1.38, gradient_norm_after_clip=1, gradient_norm_before_clip=2.96, loss=0.303, loss_video=0.141, lr=1e-6]   Steps:  30%|███       | 3/10 [00:05<00:11,  1.63s/it, L_action=0.219, L_consistency=0.0251, L_sa=1.62, L_state=1.38, gradient_norm_after_clip=1, gradient_norm_before_clip=2.96, loss=0.303, loss_video=0.141, lr=1e-6]Steps:  30%|███       | 3/10 [00:05<00:11,  1.63s/it, L_action=0.309, L_consistency=0.0282, L_sa=0.98, L_state=0.656, gradient_norm_after_clip=1, gradient_norm_before_clip=1.63, loss=0.257, loss_video=0.159, lr=1.5e-6]Steps:  40%|████      | 4/10 [00:06<00:09,  1.57s/it, L_action=0.309, L_consistency=0.0282, L_sa=0.98, L_state=0.656, gradient_norm_after_clip=1, gradient_norm_before_clip=1.63, loss=0.257, loss_video=0.159, lr=1.5e-6]Steps:  40%|████      | 4/10 [00:06<00:09,  1.57s/it, L_action=0.217, L_consistency=0.0233, L_sa=1.12, L_state=0.895, gradient_norm_after_clip=1, gradient_norm_before_clip=2.25, loss=0.251, loss_video=0.139, lr=2e-6]  Steps:  50%|█████     | 5/10 [00:08<00:07,  1.54s/it, L_action=0.217, L_consistency=0.0233, L_sa=1.12, L_state=0.895, gradient_norm_after_clip=1, gradient_norm_before_clip=2.25, loss=0.251, loss_video=0.139, lr=2e-6]Steps:  50%|█████     | 5/10 [00:08<00:07,  1.54s/it, L_action=0.146, L_consistency=0.0271, L_sa=0.75, L_state=0.594, gradient_norm_after_clip=1, gradient_norm_before_clip=1.82, loss=0.327, loss_video=0.252, lr=2.5e-6]Steps:  60%|██████    | 6/10 [00:09<00:06,  1.57s/it, L_action=0.146, L_consistency=0.0271, L_sa=0.75, L_state=0.594, gradient_norm_after_clip=1, gradient_norm_before_clip=1.82, loss=0.327, loss_video=0.252, lr=2.5e-6]Steps:  60%|██████    | 6/10 [00:09<00:06,  1.57s/it, L_action=0.287, L_consistency=0.0571, L_sa=1.12, L_state=0.805, gradient_norm_after_clip=1, gradient_norm_before_clip=1.75, loss=0.7, loss_video=0.588, lr=3e-6]    Steps:  70%|███████   | 7/10 [00:11<00:04,  1.54s/it, L_action=0.287, L_consistency=0.0571, L_sa=1.12, L_state=0.805, gradient_norm_after_clip=1, gradient_norm_before_clip=1.75, loss=0.7, loss_video=0.588, lr=3e-6]Steps:  70%|███████   | 7/10 [00:11<00:04,  1.54s/it, L_action=0.195, L_consistency=0.0258, L_sa=0.809, L_state=0.602, gradient_norm_after_clip=1, gradient_norm_before_clip=1.76, loss=0.232, loss_video=0.151, lr=3.5e-6]Steps:  80%|████████  | 8/10 [00:12<00:03,  1.52s/it, L_action=0.195, L_consistency=0.0258, L_sa=0.809, L_state=0.602, gradient_norm_after_clip=1, gradient_norm_before_clip=1.76, loss=0.232, loss_video=0.151, lr=3.5e-6]Steps:  80%|████████  | 8/10 [00:12<00:03,  1.52s/it, L_action=0.207, L_consistency=0.0243, L_sa=1, L_state=0.781, gradient_norm_after_clip=0.998, gradient_norm_before_clip=1.65, loss=0.268, loss_video=0.168, lr=4e-6]  Steps:  90%|█████████ | 9/10 [00:14<00:01,  1.50s/it, L_action=0.207, L_consistency=0.0243, L_sa=1, L_state=0.781, gradient_norm_after_clip=0.998, gradient_norm_before_clip=1.65, loss=0.268, loss_video=0.168, lr=4e-6]Steps:  90%|█████████ | 9/10 [00:14<00:01,  1.50s/it, L_action=0.0708, L_consistency=0.0231, L_sa=1.12, L_state=1.04, gradient_norm_after_clip=1, gradient_norm_before_clip=2.38, loss=0.24, loss_video=0.128, lr=4.5e-6]Steps: 100%|██████████| 10/10 [00:15<00:00,  1.50s/it, L_action=0.0708, L_consistency=0.0231, L_sa=1.12, L_state=1.04, gradient_norm_after_clip=1, gradient_norm_before_clip=2.38, loss=0.24, loss_video=0.128, lr=4.5e-6]05/27/2026 12:09:48 - INFO - accelerate.accelerator - [RANK 0] Saving current state to /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/checkpoints/i2av/smoke_v1_pose_rgb/checkpoint-10
+Model weights saved in /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/checkpoints/i2av/smoke_v1_pose_rgb/checkpoint-10/pytorch_lora_weights.safetensors
+05/27/2026 12:09:52 - INFO - accelerate.checkpointing - [RANK 0] Optimizer state saved in /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/checkpoints/i2av/smoke_v1_pose_rgb/checkpoint-10/optimizer.bin
+05/27/2026 12:09:52 - INFO - accelerate.checkpointing - [RANK 0] Scheduler state saved in /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/checkpoints/i2av/smoke_v1_pose_rgb/checkpoint-10/scheduler.bin
+05/27/2026 12:09:52 - INFO - accelerate.checkpointing - [RANK 0] Sampler state for dataloader 0 saved in /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/checkpoints/i2av/smoke_v1_pose_rgb/checkpoint-10/sampler.bin
+05/27/2026 12:09:52 - INFO - accelerate.checkpointing - [RANK 0] Random states saved in /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/checkpoints/i2av/smoke_v1_pose_rgb/checkpoint-10/random_states_0.pkl
+05/27/2026 12:09:52 - INFO - __main__ - [RANK 0] Saved state to /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/checkpoints/i2av/smoke_v1_pose_rgb/checkpoint-10
+Steps: 100%|██████████| 10/10 [00:19<00:00,  1.50s/it, L_action=0.318, L_consistency=0.0293, L_sa=1.27, L_state=0.934, gradient_norm_after_clip=0.996, gradient_norm_before_clip=1.81, loss=0.323, loss_video=0.196, lr=5e-6]Model weights saved in /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/checkpoints/i2av/smoke_v1_pose_rgb/pytorch_lora_weights.safetensors
+
+Loading pipeline components...:   0%|          | 0/5 [00:00<?, ?it/s][AInstantiating AutoencoderKLCogVideoX model under default dtype torch.bfloat16.
+All model checkpoint weights were used when initializing AutoencoderKLCogVideoX.
+
+All the weights of AutoencoderKLCogVideoX were initialized from the model checkpoint at /project/llmsvgen/sunkai/robomaster_3d/CoAF/training/cog_video_training/models/CogVideoX-5b-I2V/vae.
+If your task is similar to the task the model of the checkpoint was trained on, you can already use AutoencoderKLCogVideoX for predictions without further training.
+Loaded vae as AutoencoderKLCogVideoX from `vae` subfolder of /project/llmsvgen/sunkai/robomaster_3d/CoAF/training/cog_video_training/models/CogVideoX-5b-I2V.
+
+Loading pipeline components...:  20%|██        | 1/5 [00:00<00:00,  4.84it/s][ALoaded scheduler as CogVideoXDDIMScheduler from `scheduler` subfolder of /project/llmsvgen/sunkai/robomaster_3d/CoAF/training/cog_video_training/models/CogVideoX-5b-I2V.
+Instantiating CogVideoXTransformer3DModel model under default dtype torch.bfloat16.
+{'ofs_embed_dim', 'patch_size_t', 'patch_bias'} was not found in config. Values will be initialized to default values.
+
+
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s][A[ALoading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00, 59.58it/s]
+All model checkpoint weights were used when initializing CogVideoXTransformer3DModel.
+
+All the weights of CogVideoXTransformer3DModel were initialized from the model checkpoint at /project/llmsvgen/sunkai/robomaster_3d/CoAF/training/cog_video_training/models/CogVideoX-5b-I2V/transformer.
+If your task is similar to the task the model of the checkpoint was trained on, you can already use CogVideoXTransformer3DModel for predictions without further training.
+Loaded transformer as CogVideoXTransformer3DModel from `transformer` subfolder of /project/llmsvgen/sunkai/robomaster_3d/CoAF/training/cog_video_training/models/CogVideoX-5b-I2V.
+
+Loading pipeline components...:  60%|██████    | 3/5 [00:00<00:00,  7.68it/s][ALoaded tokenizer as T5Tokenizer from `tokenizer` subfolder of /project/llmsvgen/sunkai/robomaster_3d/CoAF/training/cog_video_training/models/CogVideoX-5b-I2V.
+
+
+Loading weights:   0%|          | 0/219 [00:00<?, ?it/s][A[ALoading weights: 100%|██████████| 219/219 [00:00<00:00, 7346.36it/s]
+Loaded text_encoder as T5EncoderModel from `text_encoder` subfolder of /project/llmsvgen/sunkai/robomaster_3d/CoAF/training/cog_video_training/models/CogVideoX-5b-I2V.
+
+Loading pipeline components...: 100%|██████████| 5/5 [00:00<00:00, 10.35it/s][ALoading pipeline components...: 100%|██████████| 5/5 [00:00<00:00,  9.20it/s]
+Loading transformer.
+Accelerate hooks detected. Since you have called `load_lora_weights()`, the previous hooks will be first removed. Then the LoRA parameters will be loaded and the hooks will be applied again.
+Steps: 100%|██████████| 10/10 [00:22<00:00,  2.27s/it, L_action=0.318, L_consistency=0.0293, L_sa=1.27, L_state=0.934, gradient_norm_after_clip=0.996, gradient_norm_before_clip=1.81, loss=0.323, loss_video=0.196, lr=5e-6]

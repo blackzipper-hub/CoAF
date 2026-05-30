@@ -1,0 +1,56 @@
+05/27/2026 11:55:33 - INFO - __main__ - [RANK 0] Distributed environment: NO
+Num processes: 1
+Process index: 0
+Local process index: 0
+Device: cuda
+
+Mixed precision type: bf16
+
+Loading weights:   0%|          | 0/219 [00:00<?, ?it/s]Loading weights: 100%|██████████| 219/219 [00:00<00:00, 12675.29it/s]
+Instantiating CogVideoXTransformer3DModel model under default dtype torch.bfloat16.
+{'patch_size_t', 'patch_bias', 'ofs_embed_dim'} was not found in config. Values will be initialized to default values.
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00, 70.40it/s]
+All model checkpoint weights were used when initializing CogVideoXTransformer3DModel.
+
+All the weights of CogVideoXTransformer3DModel were initialized from the model checkpoint at /project/llmsvgen/sunkai/robomaster_3d/CoAF/training/cog_video_training/models/CogVideoX-5b-I2V.
+If your task is similar to the task the model of the checkpoint was trained on, you can already use CogVideoXTransformer3DModel for predictions without further training.
+All model checkpoint weights were used when initializing AutoencoderKLCogVideoX.
+
+All the weights of AutoencoderKLCogVideoX were initialized from the model checkpoint at /project/llmsvgen/sunkai/robomaster_3d/CoAF/training/cog_video_training/models/CogVideoX-5b-I2V.
+If your task is similar to the task the model of the checkpoint was trained on, you can already use AutoencoderKLCogVideoX for predictions without further training.
+/project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/finetrainers/examples/_legacy/training/cogvideox/cogvideox_image_to_video_lora_i2av.py:464: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  norm_stats = torch.load(args.state_norm_stats, map_location="cpu")
+05/27/2026 11:55:34 - INFO - __main__ - [RANK 0] Enabled temporal causal attention: CausalAttentionMeta(text_seq_length=230, num_latent_frames=13, patches_per_frame=256, num_pixel_frames=49, pixel_height=256, pixel_width=256, patch_size=2, vae_scale_factor_spatial=8, sequence_length=3662, sa_per_frame=8, s0_cond_tokens=4, tokens_per_step=264, enable_state_action=True)
+Steps:   0%|          | 0/10 [00:00<?, ?it/s]Traceback (most recent call last):
+  File "/project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/finetrainers/examples/_legacy/training/cogvideox/cogvideox_image_to_video_lora_i2av.py", line 1188, in <module>
+    main(args)
+  File "/project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/finetrainers/examples/_legacy/training/cogvideox/cogvideox_image_to_video_lora_i2av.py", line 944, in main
+    model_output, sa_pred = forward_i2av_transformer(
+  File "/project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/finetrainers/finetrainers/patches/models/cogvideox/i2av_forward.py", line 54, in forward_i2av_transformer
+    hidden_states, encoder_hidden_states = transformer._gradient_checkpointing_func(
+  File "/project/llmsvgen/yazhoux/miniconda3/envs/coaf_train/lib/python3.10/site-packages/diffusers/models/modeling_utils.py", line 305, in _gradient_checkpointing_func
+    return torch.utils.checkpoint.checkpoint(
+  File "/project/llmsvgen/yazhoux/miniconda3/envs/coaf_train/lib/python3.10/site-packages/torch/_compile.py", line 32, in inner
+    return disable_fn(*args, **kwargs)
+  File "/project/llmsvgen/yazhoux/miniconda3/envs/coaf_train/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py", line 632, in _fn
+    return fn(*args, **kwargs)
+  File "/project/llmsvgen/yazhoux/miniconda3/envs/coaf_train/lib/python3.10/site-packages/torch/utils/checkpoint.py", line 496, in checkpoint
+    ret = function(*args, **kwargs)
+  File "/project/llmsvgen/yazhoux/miniconda3/envs/coaf_train/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/project/llmsvgen/yazhoux/miniconda3/envs/coaf_train/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/project/llmsvgen/yazhoux/miniconda3/envs/coaf_train/lib/python3.10/site-packages/diffusers/models/transformers/cogvideox_transformer_3d.py", line 135, in forward
+    attn_hidden_states, attn_encoder_hidden_states = self.attn1(
+  File "/project/llmsvgen/yazhoux/miniconda3/envs/coaf_train/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/project/llmsvgen/yazhoux/miniconda3/envs/coaf_train/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/project/llmsvgen/yazhoux/miniconda3/envs/coaf_train/lib/python3.10/site-packages/diffusers/models/attention_processor.py", line 607, in forward
+    return self.processor(
+  File "/project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/finetrainers/finetrainers/patches/models/cogvideox/causal_attention.py", line 146, in __call__
+    query[:, :, text_seq_length:] = apply_rotary_emb(query[:, :, text_seq_length:], image_rotary_emb)
+  File "/project/llmsvgen/yazhoux/miniconda3/envs/coaf_train/lib/python3.10/site-packages/diffusers/models/embeddings.py", line 1231, in apply_rotary_emb
+    out = (x.float() * cos + x_rotated.float() * sin).to(x.dtype)
+RuntimeError: The size of tensor a (3432) must match the size of tensor b (1056) at non-singleton dimension 2
+Steps:   0%|          | 0/10 [00:01<?, ?it/s]

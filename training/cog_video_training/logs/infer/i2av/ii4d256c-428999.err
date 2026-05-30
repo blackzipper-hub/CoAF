@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/scripts/infer_cogvideox_i2v_lora.py", line 143, in <module>
+    main()
+  File "/project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/scripts/infer_cogvideox_i2v_lora.py", line 94, in main
+    lora_dir = resolve_lora_dir(args.lora_dir)
+  File "/project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/scripts/infer_cogvideox_i2v_lora.py", line 34, in resolve_lora_dir
+    raise FileNotFoundError(f"No LoRA weights found in {path} or checkpoint-* children")
+FileNotFoundError: No LoRA weights found in /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/checkpoints/i2av/v4_depth_rgb_256 or checkpoint-* children

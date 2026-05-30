@@ -1,0 +1,29 @@
+Wed May 27 23:52:17 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 570.158.01             Driver Version: 570.158.01     CUDA Version: 12.8     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA H800                    On  |   00000000:52:00.0 Off |                    0 |
+| N/A   34C    P0             71W /  700W |       0MiB /  81559MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+Inference output: /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/v4_depth_rgb_256_causal/checkpoint-60000
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/v4_depth_rgb_256_causal/checkpoint-60000/sample_000.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/v4_depth_rgb_256_causal/checkpoint-60000/sample_001.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/v4_depth_rgb_256_causal/checkpoint-60000/sample_002.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/v4_depth_rgb_256_causal/checkpoint-60000/sample_003.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/v4_depth_rgb_256_causal/checkpoint-60000/sample_004.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/v4_depth_rgb_256_causal/checkpoint-60000/sample_005.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/v4_depth_rgb_256_causal/checkpoint-60000/sample_006.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/v4_depth_rgb_256_causal/checkpoint-60000/sample_007.mp4

@@ -1,0 +1,30 @@
+05/26/2026 16:57:58 - INFO - __main__ - [RANK 0] Distributed environment: NO
+Num processes: 1
+Process index: 0
+Local process index: 0
+Device: cuda
+
+Mixed precision type: bf16
+
+Loading weights:   0%|          | 0/219 [00:00<?, ?it/s]Loading weights: 100%|██████████| 219/219 [00:00<00:00, 46857.76it/s]
+Instantiating CogVideoXTransformer3DModel model under default dtype torch.bfloat16.
+{'ofs_embed_dim', 'patch_size_t', 'patch_bias'} was not found in config. Values will be initialized to default values.
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  67%|██████▋   | 2/3 [00:00<00:00, 14.87it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00, 19.31it/s]
+All model checkpoint weights were used when initializing CogVideoXTransformer3DModel.
+
+All the weights of CogVideoXTransformer3DModel were initialized from the model checkpoint at /project/llmsvgen/sunkai/robomaster_3d/CoAF/training/cog_video_training/models/CogVideoX-5b-I2V.
+If your task is similar to the task the model of the checkpoint was trained on, you can already use CogVideoXTransformer3DModel for predictions without further training.
+All model checkpoint weights were used when initializing AutoencoderKLCogVideoX.
+
+All the weights of AutoencoderKLCogVideoX were initialized from the model checkpoint at /project/llmsvgen/sunkai/robomaster_3d/CoAF/training/cog_video_training/models/CogVideoX-5b-I2V.
+If your task is similar to the task the model of the checkpoint was trained on, you can already use AutoencoderKLCogVideoX for predictions without further training.
+/project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/finetrainers/examples/_legacy/training/cogvideox/cogvideox_image_to_video_lora_i2av.py:442: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  norm_stats = torch.load(args.state_norm_stats, map_location="cpu")
+05/26/2026 16:57:58 - INFO - __main__ - [RANK 0] Enabled temporal causal attention: CausalAttentionMeta(text_seq_length=230, num_latent_frames=13, patches_per_frame=256, num_pixel_frames=49, pixel_height=256, pixel_width=256, patch_size=2, vae_scale_factor_spatial=8, sequence_length=3662, sa_per_frame=8, s0_cond_tokens=4, tokens_per_step=264, enable_state_action=True)
+Steps:   0%|          | 0/10 [00:00<?, ?it/s]Traceback (most recent call last):
+  File "/project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/finetrainers/examples/_legacy/training/cogvideox/cogvideox_image_to_video_lora_i2av.py", line 1166, in <module>
+    main(args)
+  File "/project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/finetrainers/examples/_legacy/training/cogvideox/cogvideox_image_to_video_lora_i2av.py", line 882, in main
+    prompt_embeds = torch.cat([prompt_embeds, s0_cond], dim=1)
+RuntimeError: Sizes of tensors must match except in dimension 1. Expected size 4096 but got size 3072 for tensor number 1 in the list.
+Steps:   0%|          | 0/10 [00:01<?, ?it/s]

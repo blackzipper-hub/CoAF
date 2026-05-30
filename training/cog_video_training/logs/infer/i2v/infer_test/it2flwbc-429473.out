@@ -1,0 +1,97 @@
+Wrote 1000 test validation samples to /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test_manifests/coaf_dataset_test_1k
+Wed May 27 17:35:28 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 570.158.01             Driver Version: 570.158.01     CUDA Version: 12.8     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA H800                    On  |   00000000:DF:00.0 Off |                    0 |
+| N/A   30C    P0             69W /  700W |       0MiB /  81559MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_000.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_001.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_002.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_003.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_004.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_005.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_006.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_007.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_008.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_009.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_010.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_011.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_012.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_013.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_014.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_015.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_016.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_017.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_018.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_019.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_020.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_021.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_022.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_023.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_024.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_025.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_026.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_027.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_028.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_029.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_030.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_031.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_032.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_033.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_034.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_035.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_036.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_037.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_038.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_039.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_040.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_041.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_042.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_043.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_044.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_045.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_046.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_047.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_048.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_049.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_050.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_051.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_052.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_053.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_054.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_055.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_056.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_057.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_058.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_059.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_060.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_061.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_062.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_063.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_064.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_065.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_066.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_067.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_068.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_069.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_070.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_071.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_072.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_073.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_074.mp4
+Wrote /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/infer/i2v/test/v2_flow_rgb_causal/sample_075.mp4

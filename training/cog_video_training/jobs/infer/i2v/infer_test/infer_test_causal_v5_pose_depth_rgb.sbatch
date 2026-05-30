@@ -1,0 +1,54 @@
+#!/bin/bash
+#SBATCH --job-name=it5pdprc
+#SBATCH --nodes=1
+#SBATCH --gpus=1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=240G
+#SBATCH --time=48:00:00
+#SBATCH --partition=normal
+#SBATCH --account=llmsvgen
+#SBATCH --output=/project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/logs/infer/i2v/infer_test/%x-%j.out
+#SBATCH --error=/project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/logs/infer/i2v/infer_test/%x-%j.err
+
+# Test-set inference for v5_pose_depth_rgb causal I2V LoRA.
+
+set -euo pipefail
+
+module purge
+source /project/llmsvgen/yazhoux/miniconda3/etc/profile.d/conda.sh
+conda activate coaf_train
+
+CASUAL_ROOT=/project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training
+COAF_ROOT=/project/llmsvgen/sunkai/robomaster_3d/CoAF/training/cog_video_training
+TEST_ROOT=/project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/coaf_dataset_test
+cd "${CASUAL_ROOT}"
+mkdir -p logs/infer/i2v/infer_test outputs/infer/i2v/test outputs/infer/i2v/test_manifests
+
+export HF_HOME="${COAF_ROOT}/.cache/huggingface"
+export TRANSFORMERS_CACHE="${COAF_ROOT}/.cache/huggingface/transformers"
+export HF_DATASETS_CACHE="${COAF_ROOT}/.cache/huggingface/datasets"
+export TOKENIZERS_PARALLELISM=false
+export PYTHONNOUSERSITE=1
+
+export MODEL_PATH="${COAF_ROOT}/models/CogVideoX-5b-I2V"
+export DATA_ROOT="${CASUAL_ROOT}/outputs/infer/i2v/test_manifests/coaf_dataset_test_1k"
+export CHECKPOINT_DIR="${CASUAL_ROOT}/outputs/checkpoints/v5_pose_depth_rgb_causal_gradient_accumulation_2"
+export CHECKPOINT_STEP=60000
+export INFER_OUTPUT_DIR="${CASUAL_ROOT}/outputs/infer/i2v/test/v5_pose_depth_rgb_causal"
+
+export HEIGHT=256
+export WIDTH=256
+export FPS=8
+export MAX_NUM_FRAMES=73
+export NUM_SAMPLES="${NUM_SAMPLES:-1000}"
+export NUM_INFERENCE_STEPS="${NUM_INFERENCE_STEPS:-50}"
+export GUIDANCE_SCALE="${GUIDANCE_SCALE:-6}"
+
+python "${CASUAL_ROOT}/scripts/build_test_i2v_validation.py" \
+  --test-root "${TEST_ROOT}" \
+  --output-root "${DATA_ROOT}" \
+  --max-samples "${NUM_SAMPLES}"
+
+nvidia-smi || true
+
+bash "${CASUAL_ROOT}/scripts/infer_cogvideox_i2v_lora_causal.sh"

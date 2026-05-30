@@ -1,0 +1,28 @@
+# Large data / artifacts (not uploaded)
+coaf_dataset/
+coaf_dataset_test/
+**/outputs/
+**/output/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+*.so
+
+# Env / IDE
+.env
+.venv/
+venv/
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Nested clone metadata (keep local .git only)
+**/.git.bak/

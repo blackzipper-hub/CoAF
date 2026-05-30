@@ -1,0 +1,124 @@
+05/27/2026 22:30:14 - INFO - __main__ - [RANK 0] Distributed environment: MULTI_GPU  Backend: nccl
+Num processes: 4
+Process index: 0
+Local process index: 0
+Device: cuda:0
+
+Mixed precision type: bf16
+
+Loading weights:   0%|          | 0/219 [00:00<?, ?it/s]Loading weights: 100%|██████████| 219/219 [00:00<00:00, 25226.64it/s]
+Instantiating CogVideoXTransformer3DModel model under default dtype torch.bfloat16.
+{'patch_size_t', 'ofs_embed_dim', 'patch_bias'} was not found in config. Values will be initialized to default values.
+05/27/2026 22:30:15 - INFO - __main__ - [RANK 1] Distributed environment: MULTI_GPU  Backend: nccl
+Num processes: 4
+Process index: 1
+Local process index: 1
+Device: cuda:1
+
+Mixed precision type: bf16
+
+05/27/2026 22:30:15 - INFO - __main__ - [RANK 2] Distributed environment: MULTI_GPU  Backend: nccl
+Num processes: 4
+Process index: 2
+Local process index: 2
+Device: cuda:2
+
+Mixed precision type: bf16
+
+05/27/2026 22:30:15 - INFO - __main__ - [RANK 3] Distributed environment: MULTI_GPU  Backend: nccl
+Num processes: 4
+Process index: 3
+Local process index: 3
+Device: cuda:3
+
+Mixed precision type: bf16
+
+Loading weights:   0%|          | 0/219 [00:00<?, ?it/s]Loading weights: 100%|██████████| 219/219 [00:00<00:00, 12167.71it/s]
+Loading weights:   0%|          | 0/219 [00:00<?, ?it/s]Loading weights:   0%|          | 0/219 [00:00<?, ?it/s]Loading weights: 100%|██████████| 219/219 [00:00<00:00, 10812.61it/s]
+Loading weights: 100%|██████████| 219/219 [00:00<00:00, 10759.41it/s]
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00, 68.31it/s]
+All model checkpoint weights were used when initializing CogVideoXTransformer3DModel.
+
+All the weights of CogVideoXTransformer3DModel were initialized from the model checkpoint at /project/llmsvgen/sunkai/robomaster_3d/CoAF/training/cog_video_training/models/CogVideoX-5b-I2V.
+If your task is similar to the task the model of the checkpoint was trained on, you can already use CogVideoXTransformer3DModel for predictions without further training.
+All model checkpoint weights were used when initializing AutoencoderKLCogVideoX.
+
+All the weights of AutoencoderKLCogVideoX were initialized from the model checkpoint at /project/llmsvgen/sunkai/robomaster_3d/CoAF/training/cog_video_training/models/CogVideoX-5b-I2V.
+If your task is similar to the task the model of the checkpoint was trained on, you can already use AutoencoderKLCogVideoX for predictions without further training.
+05/27/2026 22:30:15 - INFO - __main__ - [RANK 0] Enabled temporal causal attention: CausalAttentionMeta(text_seq_length=226, num_latent_frames=13, patches_per_frame=256, num_pixel_frames=49, pixel_height=256, pixel_width=256, patch_size=2, vae_scale_factor_spatial=8, sequence_length=3554)
+05/27/2026 22:30:31 - INFO - accelerate.accelerator - [RANK 0] Loading states from /project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/outputs/checkpoints/v2_flow_rgb_causal/checkpoint-10000
+05/27/2026 22:30:32 - INFO - accelerate.checkpointing - [RANK 0] All model weights loaded successfully
+05/27/2026 22:30:34 - INFO - accelerate.checkpointing - [RANK 0] All optimizer states loaded successfully
+05/27/2026 22:30:34 - INFO - accelerate.checkpointing - [RANK 0] All scheduler states loaded successfully
+05/27/2026 22:30:34 - INFO - accelerate.checkpointing - [RANK 0] All dataloader sampler states loaded successfully
+05/27/2026 22:30:34 - INFO - accelerate.checkpointing - [RANK 0] All random states loaded successfully
+05/27/2026 22:30:34 - INFO - accelerate.accelerator - [RANK 0] Loading in 0 custom states
+Steps:  17%|█▋        | 10000/60000 [00:00<?, ?it/s][rank0]:[W527 22:30:36.980642750 reducer.cpp:1400] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+[rank1]:[W527 22:30:36.982660078 reducer.cpp:1400] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+[rank2]:[W527 22:30:36.997279157 reducer.cpp:1400] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+[rank3]:[W527 22:30:36.998408926 reducer.cpp:1400] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+Steps:  17%|█▋        | 10000/60000 [00:02<?, ?it/s, loss=0.0552, lr=0.0001]Steps:  17%|█▋        | 10000/60000 [00:04<?, ?it/s, loss=0.058, lr=0.0001] Steps:  17%|█▋        | 10000/60000 [00:05<?, ?it/s, loss=0.0491, lr=0.0001]Steps:  17%|█▋        | 10000/60000 [00:07<?, ?it/s, loss=0.0709, lr=0.0001]Steps:  17%|█▋        | 10000/60000 [00:09<?, ?it/s, loss=0.0501, lr=0.0001]Steps:  17%|█▋        | 10000/60000 [00:11<?, ?it/s, loss=0.0437, lr=0.0001]Steps:  17%|█▋        | 10000/60000 [00:13<?, ?it/s, loss=0.0594, lr=0.0001]Steps:  17%|█▋        | 10001/60000 [00:14<205:48:50, 14.82s/it, loss=0.0594, lr=0.0001][rank1]: Traceback (most recent call last):
+[rank1]:   File "/project/llmsvgen/sunkai/robomaster_3d/CoAF/training/cog_video_training/finetrainers/examples/_legacy/training/cogvideox/cogvideox_image_to_video_lora.py", line 1060, in <module>
+[rank1]:     main(args)
+[rank1]:   File "/project/llmsvgen/sunkai/robomaster_3d/CoAF/training/cog_video_training/finetrainers/examples/_legacy/training/cogvideox/cogvideox_image_to_video_lora.py", line 921, in main
+[rank1]:     args.validation_steps is not None and global_step % args.validation_steps == 0
+[rank1]: ZeroDivisionError: integer division or modulo by zero
+[rank3]: Traceback (most recent call last):
+[rank3]:   File "/project/llmsvgen/sunkai/robomaster_3d/CoAF/training/cog_video_training/finetrainers/examples/_legacy/training/cogvideox/cogvideox_image_to_video_lora.py", line 1060, in <module>
+[rank3]:     main(args)
+[rank3]:   File "/project/llmsvgen/sunkai/robomaster_3d/CoAF/training/cog_video_training/finetrainers/examples/_legacy/training/cogvideox/cogvideox_image_to_video_lora.py", line 921, in main
+[rank3]:     args.validation_steps is not None and global_step % args.validation_steps == 0
+[rank3]: ZeroDivisionError: integer division or modulo by zero
+[rank2]: Traceback (most recent call last):
+[rank2]:   File "/project/llmsvgen/sunkai/robomaster_3d/CoAF/training/cog_video_training/finetrainers/examples/_legacy/training/cogvideox/cogvideox_image_to_video_lora.py", line 1060, in <module>
+[rank2]:     main(args)
+[rank2]:   File "/project/llmsvgen/sunkai/robomaster_3d/CoAF/training/cog_video_training/finetrainers/examples/_legacy/training/cogvideox/cogvideox_image_to_video_lora.py", line 921, in main
+[rank2]:     args.validation_steps is not None and global_step % args.validation_steps == 0
+[rank2]: ZeroDivisionError: integer division or modulo by zero
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/project/llmsvgen/sunkai/robomaster_3d/CoAF/training/cog_video_training/finetrainers/examples/_legacy/training/cogvideox/cogvideox_image_to_video_lora.py", line 1060, in <module>
+[rank0]:     main(args)
+[rank0]:   File "/project/llmsvgen/sunkai/robomaster_3d/CoAF/training/cog_video_training/finetrainers/examples/_legacy/training/cogvideox/cogvideox_image_to_video_lora.py", line 921, in main
+[rank0]:     args.validation_steps is not None and global_step % args.validation_steps == 0
+[rank0]: ZeroDivisionError: integer division or modulo by zero
+Steps:  17%|█▋        | 10001/60000 [00:15<210:18:14, 15.14s/it, loss=0.0594, lr=0.0001]
+[rank0]:[W527 22:30:50.569395338 ProcessGroupNCCL.cpp:1250] Warning: WARNING: process group has NOT been destroyed before we destruct ProcessGroupNCCL. On normal program exit, the application should call destroy_process_group to ensure that any pending NCCL operations have finished in this process. In rare cases this process can exit before this point and block the progress of another member of the process group. This constraint has always been present,  but this warning has only been added since PyTorch 2.4 (function operator())
+W0527 22:30:51.892000 3922662 site-packages/torch/distributed/elastic/multiprocessing/api.py:897] Sending process 3922799 closing signal SIGTERM
+W0527 22:30:51.893000 3922662 site-packages/torch/distributed/elastic/multiprocessing/api.py:897] Sending process 3922801 closing signal SIGTERM
+W0527 22:30:51.893000 3922662 site-packages/torch/distributed/elastic/multiprocessing/api.py:897] Sending process 3922802 closing signal SIGTERM
+E0527 22:30:52.571000 3922662 site-packages/torch/distributed/elastic/multiprocessing/api.py:869] failed (exitcode: 1) local_rank: 1 (pid: 3922800) of binary: /project/llmsvgen/yazhoux/miniconda3/envs/coaf_train/bin/python
+Traceback (most recent call last):
+  File "/project/llmsvgen/yazhoux/miniconda3/envs/coaf_train/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/project/llmsvgen/yazhoux/miniconda3/envs/coaf_train/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/project/llmsvgen/yazhoux/miniconda3/envs/coaf_train/lib/python3.10/site-packages/accelerate/commands/launch.py", line 1415, in <module>
+    main()
+  File "/project/llmsvgen/yazhoux/miniconda3/envs/coaf_train/lib/python3.10/site-packages/accelerate/commands/launch.py", line 1411, in main
+    launch_command(args)
+  File "/project/llmsvgen/yazhoux/miniconda3/envs/coaf_train/lib/python3.10/site-packages/accelerate/commands/launch.py", line 1396, in launch_command
+    multi_gpu_launcher(args)
+  File "/project/llmsvgen/yazhoux/miniconda3/envs/coaf_train/lib/python3.10/site-packages/accelerate/commands/launch.py", line 1023, in multi_gpu_launcher
+    distrib_run.run(args)
+  File "/project/llmsvgen/yazhoux/miniconda3/envs/coaf_train/lib/python3.10/site-packages/torch/distributed/run.py", line 910, in run
+    elastic_launch(
+  File "/project/llmsvgen/yazhoux/miniconda3/envs/coaf_train/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 138, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/project/llmsvgen/yazhoux/miniconda3/envs/coaf_train/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 269, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+cogvideox_image_to_video_lora.py FAILED
+------------------------------------------------------------
+Failures:
+  <NO_OTHER_FAILURES>
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2026-05-27_22:30:51
+  host      : dgx-24.cm.cluster
+  rank      : 1 (local_rank: 1)
+  exitcode  : 1 (pid: 3922800)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================

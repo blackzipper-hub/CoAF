@@ -1,0 +1,99 @@
+Wed May 27 18:19:14 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 570.158.01             Driver Version: 570.158.01     CUDA Version: 12.8     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA H800                    On  |   00000000:1B:00.0 Off |                    0 |
+| N/A   39C    P0             71W /  700W |       0MiB /  81559MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+|   1  NVIDIA H800                    On  |   00000000:43:00.0 Off |                    0 |
+| N/A   22C    P0             69W /  700W |       0MiB /  81559MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+|   2  NVIDIA H800                    On  |   00000000:52:00.0 Off |                    0 |
+| N/A   24C    P0             69W /  700W |       0MiB /  81559MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+|   3  NVIDIA H800                    On  |   00000000:61:00.0 Off |                    0 |
+| N/A   23C    P0             69W /  700W |       0MiB /  81559MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+I2AV launch: 4 GPU(s), per-GPU batch=1, grad_accum=8, effective batch=32
+===== Memory before training =====
+memory_allocated=20.216 GB
+max_memory_allocated=20.216 GB
+max_memory_reserved=20.553 GB
+***** Running training *****
+  Num trainable parameters = 148973582
+  Num examples = 5000
+  Num batches each epoch = 1250
+  Num epochs = 383
+  Instantaneous batch size per device = 1
+  Total train batch size (w. parallel, distributed & accumulation) = 32
+  Gradient accumulation steps = 8
+  Total optimization steps = 60000
+Checkpoint 'latest' does not exist. Starting a new training run.
+memory_allocated=20.864 GB
+max_memory_allocated=22.528 GB
+max_memory_reserved=30.068 GB
+memory_allocated=30.153 GB
+max_memory_allocated=30.153 GB
+max_memory_reserved=30.402 GB
+===== Memory before validation =====
+memory_allocated=20.865 GB
+max_memory_allocated=22.528 GB
+max_memory_reserved=23.615 GB
+===== Memory after validation =====
+memory_allocated=30.150 GB
+max_memory_allocated=30.150 GB
+max_memory_reserved=30.410 GB
+memory_allocated=20.864 GB
+max_memory_allocated=22.528 GB
+max_memory_reserved=30.068 GB
+memory_allocated=30.153 GB
+max_memory_allocated=30.153 GB
+max_memory_reserved=30.402 GB
+memory_allocated=20.864 GB
+max_memory_allocated=22.528 GB
+max_memory_reserved=30.068 GB
+memory_allocated=30.153 GB
+max_memory_allocated=30.153 GB
+max_memory_reserved=30.402 GB
+memory_allocated=29.738 GB
+max_memory_allocated=31.401 GB
+max_memory_reserved=32.477 GB
+memory_allocated=39.023 GB
+max_memory_allocated=39.023 GB
+max_memory_reserved=39.293 GB
+===== Memory before validation =====
+memory_allocated=29.736 GB
+max_memory_allocated=31.400 GB
+max_memory_reserved=32.465 GB
+===== Memory after validation =====
+memory_allocated=39.021 GB
+max_memory_allocated=39.021 GB
+max_memory_reserved=39.287 GB
+memory_allocated=29.738 GB
+max_memory_allocated=31.401 GB
+max_memory_reserved=32.477 GB
+memory_allocated=39.023 GB
+max_memory_allocated=39.023 GB
+max_memory_reserved=39.293 GB
+memory_allocated=29.738 GB
+max_memory_allocated=31.401 GB
+max_memory_reserved=32.477 GB
+memory_allocated=39.023 GB
+max_memory_allocated=39.023 GB
+max_memory_reserved=39.293 GB

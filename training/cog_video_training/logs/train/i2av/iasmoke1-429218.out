@@ -1,0 +1,35 @@
+Wed May 27 11:55:11 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 570.158.01             Driver Version: 570.158.01     CUDA Version: 12.8     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA H800                    On  |   00000000:43:00.0 Off |                    0 |
+| N/A   24C    P0             70W /  700W |       0MiB /  81559MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+I2AV launch: 1 GPU(s), per-GPU batch=1, grad_accum=1, effective batch=1
+===== Memory before training =====
+memory_allocated=19.939 GB
+max_memory_allocated=19.939 GB
+max_memory_reserved=20.045 GB
+***** Running training *****
+  Num trainable parameters = 148973582
+  Num examples = 5000
+  Num batches each epoch = 5000
+  Num epochs = 1
+  Instantaneous batch size per device = 1
+  Total train batch size (w. parallel, distributed & accumulation) = 1
+  Gradient accumulation steps = 1
+  Total optimization steps = 10
+Checkpoint 'latest' does not exist. Starting a new training run.
