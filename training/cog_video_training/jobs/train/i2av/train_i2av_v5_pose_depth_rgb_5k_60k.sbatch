@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=ia5pdprc
+#SBATCH --job-name=tpdrg3cv5
 #SBATCH --nodes=1
 #SBATCH --gpus=8
 #SBATCH --cpus-per-task=64

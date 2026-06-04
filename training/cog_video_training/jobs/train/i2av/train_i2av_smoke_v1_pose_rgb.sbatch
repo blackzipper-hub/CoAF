@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=iasmoke1
+#SBATCH --job-name=tpsrg3cv1
 #SBATCH --nodes=1
 #SBATCH --gpus=1
 #SBATCH --cpus-per-task=16

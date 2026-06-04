@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=ia4d256c
+#SBATCH --job-name=tdprg3cv4
 #SBATCH --nodes=1
 #SBATCH --gpus=4
 #SBATCH --time=48:00:00

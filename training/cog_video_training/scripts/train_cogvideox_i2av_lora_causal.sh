@@ -43,6 +43,31 @@ for required_file in videos.txt images.txt prompt.txt validation.json state_path
   fi
 done
 
+if [[ -n "${LOAD_TENSORS:-}" ]]; then
+  "${PYTHON}" - <<'PY'
+import os
+from pathlib import Path
+
+data_root = Path(os.environ["DATA_ROOT"])
+video_paths = [Path(line.strip()) for line in (data_root / "videos.txt").read_text().splitlines() if line.strip()]
+missing = []
+for video_path in video_paths:
+    stem = video_path.stem
+    for dirname in ("video_latents", "image_latents", "prompt_embeds"):
+        tensor_path = data_root / dirname / f"{stem}.pt"
+        if not tensor_path.is_file():
+            missing.append(str(tensor_path))
+            break
+if missing:
+    preview = "\n".join(missing[:10])
+    raise SystemExit(
+        f"LOAD_TENSORS=1 but {len(missing)} / {len(video_paths)} samples are missing precomputed tensors. "
+        f"First missing paths:\n{preview}"
+    )
+print(f"LOAD_TENSORS=1: found precomputed tensors for {len(video_paths)} samples under {data_root}")
+PY
+fi
+
 FIRST_VALIDATION_PROMPT="$("${PYTHON}" - <<'PY'
 import json
 import os
@@ -82,6 +107,30 @@ fi
 EFFECTIVE_BATCH_SIZE=$((TRAIN_BATCH_SIZE * NUM_GPUS * GRADIENT_ACCUMULATION_STEPS))
 echo "I2AV launch: ${NUM_GPUS} GPU(s), per-GPU batch=${TRAIN_BATCH_SIZE}, grad_accum=${GRADIENT_ACCUMULATION_STEPS}, effective batch=${EFFECTIVE_BATCH_SIZE}"
 
+RESUME_FROM_CHECKPOINT="${RESUME_FROM_CHECKPOINT:-latest}"
+RESUME_ARGS=()
+if [[ -n "${RESUME_FROM_CHECKPOINT}" && "${RESUME_FROM_CHECKPOINT}" != "none" ]]; then
+  RESUME_ARGS=(--resume_from_checkpoint "${RESUME_FROM_CHECKPOINT}")
+fi
+ACTION_ARGS=()
+if [[ -n "${ACTION_NORM_STATS:-}" ]]; then
+  if [[ ! -f "${ACTION_NORM_STATS}" ]]; then
+    echo "Missing action norm stats at ${ACTION_NORM_STATS}" >&2
+    exit 1
+  fi
+  ACTION_ARGS=(--action_norm_stats "${ACTION_NORM_STATS}")
+fi
+STAGE_ARGS=()
+if [[ "${STAGE2_TRAIN_TRANSFORMER_LORA:-0}" == "1" ]]; then
+  STAGE_ARGS+=(--stage2_train_transformer_lora)
+fi
+if [[ "${GRIPPER_CONTINUOUS_ACTION:-0}" == "1" ]]; then
+  STAGE_ARGS+=(--gripper_continuous_action)
+fi
+if [[ "${SA_DENOISE_LOSS:-0}" == "1" ]]; then
+  STAGE_ARGS+=(--sa_denoise_loss)
+fi
+
 "${LAUNCHER[@]}" cogvideox_image_to_video_lora_i2av.py \
   --pretrained_model_name_or_path "${MODEL_PATH}" \
   --data_root "${DATA_ROOT}" \
@@ -101,7 +150,7 @@ echo "I2AV launch: ${NUM_GPUS} GPU(s), per-GPU batch=${TRAIN_BATCH_SIZE}, grad_a
   --max_train_steps "${TRAIN_STEPS:-60000}" \
   --checkpointing_steps "${CHECKPOINTING_STEPS:-5000}" \
   --checkpoints_total_limit "${CHECKPOINTS_TOTAL_LIMIT:-12}" \
-  --resume_from_checkpoint latest \
+  "${RESUME_ARGS[@]}" \
   --rank 128 \
   --lora_alpha 128 \
   --learning_rate "${LR:-1e-4}" \
@@ -131,9 +180,18 @@ echo "I2AV launch: ${NUM_GPUS} GPU(s), per-GPU batch=${TRAIN_BATCH_SIZE}, grad_a
   --temporal_causal_attention \
   --enable_i2av \
   --state_norm_stats "${STATE_NORM_STATS}" \
+  "${ACTION_ARGS[@]}" \
   --lambda_sa "${LAMBDA_SA:-0.1}" \
   --lambda_s "${LAMBDA_S:-1.0}" \
   --lambda_a "${LAMBDA_A:-1.0}" \
+  --lambda_g "${LAMBDA_G:-1.0}" \
   --lambda_c "${LAMBDA_C:-0.5}" \
   --sa_per_frame "${SA_PER_FRAME:-8}" \
-  --s0_cond_tokens "${S0_COND_TOKENS:-4}"
+  --s0_cond_tokens "${S0_COND_TOKENS:-4}" \
+  --i2av_layout "${I2AV_LAYOUT:-legacy}" \
+  --pose_pixel_frames "${POSE_PIXEL_FRAMES:-25}" \
+  --rgb_pixel_frames "${RGB_PIXEL_FRAMES:-24}" \
+  --train_stage "${TRAIN_STAGE:-joint}" \
+  "${STAGE_ARGS[@]}" \
+  ${RELAYOUT_V5:+--relayout_v5} \
+  ${LOAD_TENSORS:+--load_tensors}
