@@ -65,13 +65,19 @@ from finetrainers.patches.models.cogvideox.causal_attention import (
     install_temporal_causal_attention,
     write_causal_attention_metadata,
 )
-from finetrainers.patches.models.cogvideox.i2av_forward import forward_i2av_transformer
+from finetrainers.patches.models.cogvideox.i2av_forward import forward_i2av_transformer, forward_i2av_v5_transformer
+from finetrainers.patches.models.cogvideox.i2av_layout import compute_i2av_v5_layout
 from finetrainers.patches.models.cogvideox.state_action import (
+    ChunkedStateActionTokenizer,
     S0Encoder,
     StateActionTokenizer,
+    compute_sa_denoise_loss,
+    compute_sa_raw_action_loss,
     compute_sa_loss,
     load_state_action_modules,
     prepare_gt,
+    prepare_gt_chunked,
+    prepare_raw_action_gt_chunked,
     save_state_action_modules,
 )
 from dataset_i2av import I2AVCollateFunction, I2AVVideoDataset  # isort:skip
@@ -79,6 +85,7 @@ from utils import (
     get_gradient_norm,
     get_optimizer,
     prepare_i2av_rotary_positional_embeddings,
+    prepare_i2av_v5_rotary_positional_embeddings,
     prepare_rotary_positional_embeddings,
     print_memory,
     reset_memory,
@@ -458,10 +465,30 @@ def main(args):
 
     hidden_dim = get_transformer_hidden_dim(transformer)
     text_embed_dim = get_text_embed_dim(transformer)
-    sa_tokenizer = StateActionTokenizer(hidden_dim=hidden_dim, num_state_tokens=4, num_action_tokens=4)
+    v5_layout = None
+    if args.i2av_layout == "v5":
+        v5_layout = compute_i2av_v5_layout(
+            transformer.config,
+            pixel_height=args.height,
+            pixel_width=args.width,
+            pose_pixel_frames=args.pose_pixel_frames,
+            rgb_pixel_frames=args.rgb_pixel_frames,
+            text_seq_length=transformer.config.max_text_seq_length,
+            s0_cond_tokens=args.s0_cond_tokens,
+            vae_scale_factor_spatial=VAE_SCALE_FACTOR_SPATIAL,
+        )
+        sa_tokenizer = ChunkedStateActionTokenizer(
+            hidden_dim=hidden_dim,
+            steps_per_chunk=v5_layout.steps_per_chunk,
+            first_chunk_pad_steps=v5_layout.first_chunk_pad_steps,
+            real_trajectory_steps=v5_layout.real_trajectory_steps,
+        )
+    else:
+        sa_tokenizer = StateActionTokenizer(hidden_dim=hidden_dim, num_state_tokens=4, num_action_tokens=4)
     s0_encoder = S0Encoder(hidden_dim=text_embed_dim, num_tokens=args.s0_cond_tokens)
     i2av_aux = I2AVAuxModules(sa_tokenizer, s0_encoder)
     norm_stats = torch.load(args.state_norm_stats, map_location="cpu")
+    action_norm_stats = torch.load(args.action_norm_stats, map_location="cpu") if args.action_norm_stats else None
 
     text_seq_length = transformer.config.max_text_seq_length + args.s0_cond_tokens
     if args.temporal_causal_attention:
@@ -477,6 +504,9 @@ def main(args):
             enable_state_action=True,
             sa_per_frame=args.sa_per_frame,
             s0_cond_tokens=args.s0_cond_tokens,
+            i2av_layout=args.i2av_layout,
+            pose_pixel_frames=args.pose_pixel_frames,
+            rgb_pixel_frames=args.rgb_pixel_frames,
         )
         if accelerator.is_main_process:
             write_causal_attention_metadata(args.output_dir, causal_meta)
@@ -528,6 +558,13 @@ def main(args):
     )
     transformer.add_adapter(transformer_lora_config)
 
+    if args.train_stage == "stage1":
+        i2av_aux.requires_grad_(False)
+    elif args.train_stage == "stage2":
+        if not args.stage2_train_transformer_lora:
+            transformer.requires_grad_(False)
+        i2av_aux.requires_grad_(True)
+
     # create custom saving & loading hooks so that `accelerator.save_state(...)` serializes in a nice format
     def save_model_hook(models, weights, output_dir):
         if accelerator.is_main_process:
@@ -542,6 +579,8 @@ def main(args):
                         os.path.join(output_dir, "state_action.pt"),
                         unwrapped.sa_tokenizer,
                         unwrapped.s0_encoder,
+                        tokenizer_type=args.i2av_layout,
+                        steps_per_chunk=getattr(unwrapped.sa_tokenizer, "steps_per_chunk", None),
                     )
                 else:
                     raise ValueError(f"Unexpected save model: {unwrapped.__class__}")
@@ -586,6 +625,9 @@ def main(args):
                     enable_state_action=True,
                     sa_per_frame=args.sa_per_frame,
                     s0_cond_tokens=args.s0_cond_tokens,
+                    i2av_layout=args.i2av_layout,
+                    pose_pixel_frames=args.pose_pixel_frames,
+                    rgb_pixel_frames=args.rgb_pixel_frames,
                 )
 
         state_action_path = os.path.join(input_dir, "state_action.pt")
@@ -695,6 +737,9 @@ def main(args):
         "load_tensors": args.load_tensors,
         "random_flip": args.random_flip,
         "image_to_video": True,
+        "relayout_v5": args.relayout_v5,
+        "v5_reason_frames": args.pose_pixel_frames,
+        "v5_rgb_frames": args.rgb_pixel_frames,
     }
     if args.video_reshape_mode is None:
         train_dataset = I2AVVideoDataset(**dataset_init_kwargs)
@@ -806,11 +851,24 @@ def main(args):
             initial_global_step = 0
         else:
             accelerator.print(f"Resuming from checkpoint {path}")
-            accelerator.load_state(os.path.join(args.output_dir, path))
+            checkpoint_path = os.path.join(args.output_dir, path)
+            try:
+                accelerator.load_state(checkpoint_path)
+            except ValueError as exc:
+                if "different number of parameter groups" not in str(exc):
+                    raise
+                accelerator.print(
+                    "Checkpoint model weights were loaded, but optimizer state is incompatible "
+                    "with the current trainable parameter groups. Resetting optimizer/scheduler "
+                    "state and continuing from the checkpoint step."
+                )
             global_step = int(path.split("-")[1])
 
             initial_global_step = global_step
             first_epoch = global_step // num_update_steps_per_epoch
+            if lr_scheduler is not None:
+                for _ in range(global_step):
+                    lr_scheduler.step()
 
     progress_bar = tqdm(
         range(0, args.max_train_steps),
@@ -900,16 +958,42 @@ def main(args):
                     device=accelerator.device,
                 )
 
-                state_gt_13, action_gt_13, s0_norm = prepare_gt(states, norm_stats, num_latent_frames=num_frames)
+                state_delta_gt = None
+                if args.i2av_layout == "v5" and action_norm_stats is not None:
+                    if v5_layout is None:
+                        raise RuntimeError("v5 layout was not initialized.")
+                    state_gt, action_gt, state_delta_gt, s0_norm, _ = prepare_raw_action_gt_chunked(
+                        states,
+                        batch["action"].to(device=accelerator.device),
+                        norm_stats,
+                        action_norm_stats,
+                        pose_pixel_frames=v5_layout.pose_pixel_frames,
+                        steps_per_chunk=v5_layout.steps_per_chunk,
+                        gripper_continuous=args.gripper_continuous_action,
+                    )
+                elif args.i2av_layout == "v5":
+                    if v5_layout is None:
+                        raise RuntimeError("v5 layout was not initialized.")
+                    state_gt, action_gt, s0_norm, _ = prepare_gt_chunked(
+                        states,
+                        norm_stats,
+                        pose_pixel_frames=v5_layout.pose_pixel_frames,
+                        steps_per_chunk=v5_layout.steps_per_chunk,
+                    )
+                else:
+                    state_gt, action_gt, s0_norm = prepare_gt(states, norm_stats, num_latent_frames=num_frames)
                 s0_cond = s0_encoder(s0_norm.to(dtype=weight_dtype))
                 prompt_embeds = torch.cat([prompt_embeds, s0_cond], dim=1)
 
                 clean_sa = sa_tokenizer.encode(
-                    state_gt_13.to(dtype=weight_dtype),
-                    action_gt_13.to(dtype=weight_dtype),
+                    state_gt.to(dtype=weight_dtype),
+                    action_gt.to(dtype=weight_dtype),
                 )
                 noise_sa = torch.randn_like(clean_sa)
-                noisy_sa = scheduler.add_noise(clean_sa, noise_sa, timesteps)
+                if args.train_stage == "stage1":
+                    noisy_sa = clean_sa
+                else:
+                    noisy_sa = scheduler.add_noise(clean_sa, noise_sa, timesteps)
 
                 patch_size = model_config.patch_size
                 grid_h = height * VAE_SCALE_FACTOR_SPATIAL // (VAE_SCALE_FACTOR_SPATIAL * patch_size)
@@ -917,8 +1001,22 @@ def main(args):
                 patches_per_frame = grid_h * grid_w
 
                 # Prepare rotary embeds
-                image_rotary_emb = (
-                    prepare_i2av_rotary_positional_embeddings(
+                if model_config.use_rotary_positional_embeddings and args.i2av_layout == "v5":
+                    image_rotary_emb = prepare_i2av_v5_rotary_positional_embeddings(
+                        height=height * VAE_SCALE_FACTOR_SPATIAL,
+                        width=width * VAE_SCALE_FACTOR_SPATIAL,
+                        layout=v5_layout,
+                        vae_scale_factor_spatial=VAE_SCALE_FACTOR_SPATIAL,
+                        patch_size=model_config.patch_size,
+                        patch_size_t=model_config.patch_size_t if hasattr(model_config, "patch_size_t") else None,
+                        attention_head_dim=model_config.attention_head_dim,
+                        device=accelerator.device,
+                        base_height=RoPE_BASE_HEIGHT,
+                        base_width=RoPE_BASE_WIDTH,
+                    )
+                else:
+                    image_rotary_emb = (
+                        prepare_i2av_rotary_positional_embeddings(
                         height=height * VAE_SCALE_FACTOR_SPATIAL,
                         width=width * VAE_SCALE_FACTOR_SPATIAL,
                         num_frames=num_frames,
@@ -933,27 +1031,43 @@ def main(args):
                     )
                     if model_config.use_rotary_positional_embeddings
                     else None
-                )
+                    )
 
                 # Add noise to the model input according to the noise magnitude at each timestep
                 # (this is the forward diffusion process)
-                noisy_video_latents = scheduler.add_noise(video_latents, noise, timesteps)
+                if args.train_stage == "stage2":
+                    noisy_video_latents = video_latents
+                else:
+                    noisy_video_latents = scheduler.add_noise(video_latents, noise, timesteps)
                 noisy_model_input = torch.cat([noisy_video_latents, image_latents], dim=2)
 
                 ofs_embed_dim = model_config.ofs_embed_dim if hasattr(model_config, "ofs_embed_dim") else None,
                 ofs_emb = None if ofs_embed_dim is None else noisy_model_input.new_full((1,), fill_value=2.0)
-                model_output, sa_pred = forward_i2av_transformer(
-                    unwrap_model(accelerator, transformer),
-                    hidden_states=noisy_model_input,
-                    encoder_hidden_states=prompt_embeds,
-                    noisy_sa_tokens=noisy_sa,
-                    timestep=timesteps,
-                    ofs=ofs_emb,
-                    image_rotary_emb=image_rotary_emb,
-                    patches_per_frame=patches_per_frame,
-                    sa_per_frame=args.sa_per_frame,
-                    return_dict=False,
-                )
+                if args.i2av_layout == "v5":
+                    model_output, sa_pred = forward_i2av_v5_transformer(
+                        unwrap_model(accelerator, transformer),
+                        hidden_states=noisy_model_input,
+                        encoder_hidden_states=prompt_embeds,
+                        noisy_chunk_tokens=noisy_sa,
+                        timestep=timesteps,
+                        ofs=ofs_emb,
+                        image_rotary_emb=image_rotary_emb,
+                        layout=v5_layout,
+                        return_dict=False,
+                    )
+                else:
+                    model_output, sa_pred = forward_i2av_transformer(
+                        unwrap_model(accelerator, transformer),
+                        hidden_states=noisy_model_input,
+                        encoder_hidden_states=prompt_embeds,
+                        noisy_sa_tokens=noisy_sa,
+                        timestep=timesteps,
+                        ofs=ofs_emb,
+                        image_rotary_emb=image_rotary_emb,
+                        patches_per_frame=patches_per_frame,
+                        sa_per_frame=args.sa_per_frame,
+                        return_dict=False,
+                    )
 
                 model_pred = scheduler.get_velocity(model_output, noisy_video_latents, timesteps)
 
@@ -963,21 +1077,64 @@ def main(args):
 
                 target = video_latents
 
-                loss_video = torch.mean(
-                    (weights * (model_pred - target) ** 2).reshape(batch_size, -1),
-                    dim=1,
-                ).mean()
+                if args.train_stage == "stage2":
+                    loss_video = model_pred.new_zeros(())
+                else:
+                    loss_video = torch.mean(
+                        (weights * (model_pred - target) ** 2).reshape(batch_size, -1),
+                        dim=1,
+                    ).mean()
 
-                sa_loss_dict = compute_sa_loss(
-                    sa_pred,
-                    sa_tokenizer,
-                    state_gt_13.to(dtype=weight_dtype),
-                    action_gt_13.to(dtype=weight_dtype),
-                    lambda_s=args.lambda_s,
-                    lambda_a=args.lambda_a,
-                    lambda_c=args.lambda_c,
-                )
-                loss = loss_video + args.lambda_sa * sa_loss_dict["L_sa"]
+                if args.sa_denoise_loss:
+                    if args.train_stage != "stage2":
+                        raise RuntimeError("--sa_denoise_loss is currently intended for train_stage=stage2.")
+                    sa_loss_dict = compute_sa_denoise_loss(
+                        sa_pred,
+                        clean_sa.to(dtype=weight_dtype),
+                        noise_sa.to(dtype=weight_dtype),
+                        sa_tokenizer,
+                        lambda_s=args.lambda_s,
+                        lambda_a=args.lambda_a,
+                    )
+                elif action_norm_stats is not None:
+                    if state_delta_gt is None:
+                        raise RuntimeError("--action_norm_stats raw-action loss currently requires i2av_layout=v5.")
+                    sa_loss_dict = compute_sa_raw_action_loss(
+                        sa_pred,
+                        sa_tokenizer,
+                        state_gt.to(dtype=weight_dtype),
+                        action_gt.to(dtype=weight_dtype),
+                        state_delta_gt.to(dtype=weight_dtype),
+                        norm_stats,
+                        action_norm_stats,
+                        lambda_s=args.lambda_s,
+                        lambda_a=args.lambda_a,
+                        lambda_g=args.lambda_g,
+                        lambda_c=args.lambda_c,
+                        gripper_continuous=args.gripper_continuous_action,
+                    )
+                else:
+                    sa_loss_dict = compute_sa_loss(
+                        sa_pred,
+                        sa_tokenizer,
+                        state_gt.to(dtype=weight_dtype),
+                        action_gt.to(dtype=weight_dtype),
+                        lambda_s=args.lambda_s,
+                        lambda_a=args.lambda_a,
+                        lambda_c=args.lambda_c,
+                    )
+                loss_video_balanced = None
+                loss_sa_balanced = None
+                if args.train_stage == "stage1":
+                    loss = loss_video
+                elif args.train_stage == "stage2":
+                    loss = sa_loss_dict["L_sa"]
+                elif action_norm_stats is not None:
+                    loss_video_balanced = loss_video / loss_video.detach().clamp_min(1e-6)
+                    loss_sa_balanced = sa_loss_dict["L_sa"] / sa_loss_dict["L_sa"].detach().clamp_min(1e-6)
+                    loss = loss_video_balanced + args.lambda_sa * loss_sa_balanced
+                else:
+                    loss = loss_video + args.lambda_sa * sa_loss_dict["L_sa"]
                 accelerator.backward(loss)
 
                 if accelerator.sync_gradients and accelerator.distributed_type != DistributedType.DEEPSPEED:
@@ -1066,6 +1223,16 @@ def main(args):
                     "lr": last_lr,
                 }
             )
+            if "L_gripper" in sa_loss_dict:
+                logs["L_gripper"] = sa_loss_dict["L_gripper"].detach().item()
+            if "L_delta_gt" in sa_loss_dict:
+                logs["L_delta_gt"] = sa_loss_dict["L_delta_gt"].detach().item()
+            if "L_sa_denoise" in sa_loss_dict:
+                logs["L_sa_denoise"] = sa_loss_dict["L_sa_denoise"].detach().item()
+            if loss_video_balanced is not None:
+                logs["loss_video_balanced"] = loss_video_balanced.detach().item()
+            if loss_sa_balanced is not None:
+                logs["loss_sa_balanced"] = loss_sa_balanced.detach().item()
             progress_bar.set_postfix(**logs)
             accelerator.log(logs, step=global_step)
 
@@ -1105,6 +1272,8 @@ def main(args):
             os.path.join(args.output_dir, "state_action.pt"),
             i2av_aux_final.sa_tokenizer,
             i2av_aux_final.s0_encoder,
+            tokenizer_type=args.i2av_layout,
+            steps_per_chunk=getattr(i2av_aux_final.sa_tokenizer, "steps_per_chunk", None),
         )
         if args.temporal_causal_attention and hasattr(transformer, "_coaf_causal_meta"):
             write_causal_attention_metadata(args.output_dir, transformer._coaf_causal_meta)

@@ -363,12 +363,39 @@ def _get_training_args(parser: argparse.ArgumentParser) -> None:
         default=None,
         help="Path to state_norm_stats.pt for 7DoF normalization.",
     )
+    parser.add_argument(
+        "--action_norm_stats",
+        type=str,
+        default=None,
+        help="Path to action_norm_stats.pt for raw-action normalization. Enables raw-action SA loss.",
+    )
     parser.add_argument("--lambda_sa", type=float, default=0.1)
     parser.add_argument("--lambda_s", type=float, default=1.0)
     parser.add_argument("--lambda_a", type=float, default=1.0)
+    parser.add_argument("--lambda_g", type=float, default=1.0)
     parser.add_argument("--lambda_c", type=float, default=0.5)
+    parser.add_argument(
+        "--gripper_continuous_action",
+        action="store_true",
+        help="Treat action d6 as a continuous normalized action channel instead of a BCE gripper target.",
+    )
+    parser.add_argument(
+        "--sa_denoise_loss",
+        action="store_true",
+        help="Train stage2 SA tokens with diffusion noise prediction instead of decoded clean state/action regression.",
+    )
     parser.add_argument("--sa_per_frame", type=int, default=8)
     parser.add_argument("--s0_cond_tokens", type=int, default=4)
+    parser.add_argument("--i2av_layout", choices=["legacy", "v5"], default="legacy")
+    parser.add_argument("--pose_pixel_frames", type=int, default=25)
+    parser.add_argument("--rgb_pixel_frames", type=int, default=24)
+    parser.add_argument("--relayout_v5", action="store_true")
+    parser.add_argument("--train_stage", choices=["joint", "stage1", "stage2", "stage3"], default="joint")
+    parser.add_argument(
+        "--stage2_train_transformer_lora",
+        action="store_true",
+        help="Keep transformer LoRA trainable during stage2 instead of training only I2AV aux modules.",
+    )
 
 
 def _get_optimizer_args(parser: argparse.ArgumentParser) -> None:

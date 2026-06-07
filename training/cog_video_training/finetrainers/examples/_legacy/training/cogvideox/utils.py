@@ -281,6 +281,45 @@ def prepare_i2av_rotary_positional_embeddings(
     )
 
 
+def prepare_i2av_v5_rotary_positional_embeddings(
+    height: int,
+    width: int,
+    layout,
+    vae_scale_factor_spatial: int = 8,
+    patch_size: int = 2,
+    patch_size_t: int = None,
+    attention_head_dim: int = 64,
+    device: Optional[torch.device] = None,
+    base_height: int = 480,
+    base_width: int = 720,
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    from finetrainers.patches.models.cogvideox.i2av_sequence import expand_rope_for_chunked_i2av_timeids
+
+    freqs_cos, freqs_sin = prepare_rotary_positional_embeddings(
+        height=height,
+        width=width,
+        num_frames=2 * layout.num_pose_latent_frames + layout.num_rgb_latent_frames,
+        vae_scale_factor_spatial=vae_scale_factor_spatial,
+        patch_size=patch_size,
+        patch_size_t=patch_size_t,
+        attention_head_dim=attention_head_dim,
+        device=device,
+        base_height=base_height,
+        base_width=base_width,
+    )
+    expected = (2 * layout.num_pose_latent_frames + layout.num_rgb_latent_frames) * layout.patches_per_frame
+    if freqs_cos.shape[0] != expected:
+        raise ValueError(f"Unexpected CogVideoX v5 RoPE length: got {freqs_cos.shape[0]}, expected {expected}.")
+    return expand_rope_for_chunked_i2av_timeids(
+        freqs_cos,
+        freqs_sin,
+        layout.num_pose_latent_frames,
+        layout.num_rgb_latent_frames,
+        layout.patches_per_frame,
+        layout.chunk_token_count,
+    )
+
+
 def reset_memory(device: Union[str, torch.device]) -> None:
     gc.collect()
     torch.cuda.empty_cache()

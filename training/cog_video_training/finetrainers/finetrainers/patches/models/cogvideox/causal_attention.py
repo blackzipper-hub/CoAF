@@ -11,6 +11,8 @@ from typing import TYPE_CHECKING, Any
 import torch
 import torch.nn.functional as F
 
+from .i2av_layout import I2AVV5Layout, compute_i2av_v5_layout
+
 try:
     from torch.nn.attention import flex_attention
 except ImportError:
@@ -39,6 +41,13 @@ class CausalAttentionMeta:
     s0_cond_tokens: int = 0
     tokens_per_step: int = 0
     enable_state_action: bool = False
+    i2av_layout: str = "legacy"
+    num_pose_latent_frames: int = 0
+    num_rgb_latent_frames: int = 0
+    chunk_token_count: int = 0
+    pose_pixel_frames: int = 0
+    rgb_pixel_frames: int = 0
+    v5_layout: dict[str, Any] | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -333,6 +342,83 @@ class CogVideoXI2AVCausalTemporalAttnProcessor2_0(CogVideoXCausalTemporalAttnPro
         return torch.cat([text_output, *video_outputs], dim=2)
 
 
+class CogVideoXI2AVV5CausalAttnProcessor2_0(CogVideoXCausalTemporalAttnProcessor2_0):
+    """Joint-attention v5 mask: condition tokens + pose chunks + RGB render segment."""
+
+    def __init__(self, layout: I2AVV5Layout):
+        super().__init__(num_latent_frames=layout.num_latent_frames, patches_per_frame=layout.patches_per_frame)
+        self.layout = layout
+
+    def _temporal_causal_attention(
+        self,
+        query: torch.Tensor,
+        key: torch.Tensor,
+        value: torch.Tensor,
+        text_seq_length: int,
+    ) -> torch.Tensor:
+        if text_seq_length != self.layout.condition_tokens:
+            raise ValueError(
+                f"I2AV v5 condition length mismatch: got {text_seq_length}, "
+                f"expected {self.layout.condition_tokens}."
+            )
+        video_seq_length = query.size(2) - text_seq_length
+        if video_seq_length != self.layout.video_tokens:
+            raise ValueError(
+                f"Unexpected I2AV v5 video token count: got {video_seq_length}, "
+                f"expected {self.layout.video_tokens}."
+            )
+        if self.backend == "flex":
+            raise NotImplementedError("I2AV v5 FlexAttention mask is not implemented yet; use chunked backend.")
+
+        condition_output = F.scaled_dot_product_attention(
+            query[:, :, :text_seq_length],
+            key[:, :, :text_seq_length],
+            value[:, :, :text_seq_length],
+            dropout_p=0.0,
+            is_causal=False,
+        )
+
+        outputs = []
+        p = self.layout.patches_per_frame
+        k_tokens = self.layout.chunk_token_count
+        step = self.layout.pose_step_tokens
+        pose_base = text_seq_length
+        for chunk_idx in range(self.layout.num_pose_latent_frames):
+            chunk_start = pose_base + chunk_idx * step
+            chunk_end = chunk_start + step
+            q_chunk = query[:, :, chunk_start:chunk_end]
+            k_chunk = key[:, :, :chunk_end]
+            v_chunk = value[:, :, :chunk_end]
+
+            kv_len = k_chunk.size(2)
+            allow = torch.ones(step, kv_len, dtype=torch.bool, device=query.device)
+            allow[:p, kv_len - k_tokens : kv_len] = False
+            attn_mask = torch.zeros(1, 1, step, kv_len, device=query.device, dtype=query.dtype)
+            attn_mask = attn_mask.masked_fill(~allow.view(1, 1, step, kv_len), MASK_VALUE)
+            outputs.append(
+                F.scaled_dot_product_attention(
+                    q_chunk,
+                    k_chunk,
+                    v_chunk,
+                    attn_mask=attn_mask,
+                    dropout_p=0.0,
+                    is_causal=False,
+                )
+            )
+
+        rgb_start = pose_base + self.layout.pose_video_tokens
+        rgb_end = rgb_start + self.layout.rgb_video_tokens
+        rgb_output = F.scaled_dot_product_attention(
+            query[:, :, rgb_start:rgb_end],
+            key[:, :, :rgb_end],
+            value[:, :, :rgb_end],
+            dropout_p=0.0,
+            is_causal=False,
+        )
+        outputs.append(rgb_output)
+        return torch.cat([condition_output, *outputs], dim=2)
+
+
 def install_temporal_causal_attention(
     transformer: "CogVideoXTransformer3DModel",
     *,
@@ -347,6 +433,9 @@ def install_temporal_causal_attention(
     enable_state_action: bool = False,
     sa_per_frame: int = 8,
     s0_cond_tokens: int = 4,
+    i2av_layout: str = "legacy",
+    pose_pixel_frames: int = 25,
+    rgb_pixel_frames: int = 24,
 ) -> CausalAttentionMeta:
     """Replace all ``attn1`` processors with a temporal-causal variant."""
     patch_size = transformer.config.patch_size
@@ -363,7 +452,28 @@ def install_temporal_causal_attention(
     )
 
     device = device or next(transformer.parameters()).device
-    if enable_state_action:
+    v5_layout = None
+    if enable_state_action and i2av_layout == "v5":
+        base_text_seq_length = (
+            text_seq_length - s0_cond_tokens
+            if text_seq_length > transformer.config.max_text_seq_length
+            else text_seq_length
+        )
+        v5_layout = compute_i2av_v5_layout(
+            transformer.config,
+            pixel_height=pixel_height,
+            pixel_width=pixel_width,
+            pose_pixel_frames=pose_pixel_frames,
+            rgb_pixel_frames=rgb_pixel_frames,
+            text_seq_length=base_text_seq_length,
+            s0_cond_tokens=s0_cond_tokens,
+            vae_scale_factor_spatial=vae_scale_factor_spatial,
+            temporal_compression_ratio=temporal_compression_ratio,
+        )
+        processor = CogVideoXI2AVV5CausalAttnProcessor2_0(v5_layout)
+        tokens_per_step = v5_layout.pose_step_tokens
+        video_seq_length = v5_layout.video_tokens
+    elif enable_state_action:
         processor = CogVideoXI2AVCausalTemporalAttnProcessor2_0(
             num_latent_frames=num_latent_frames,
             patches_per_frame=patches_per_frame,
@@ -395,7 +505,16 @@ def install_temporal_causal_attention(
         s0_cond_tokens=s0_cond_tokens if enable_state_action else 0,
         tokens_per_step=tokens_per_step if enable_state_action else patches_per_frame,
         enable_state_action=enable_state_action,
+        i2av_layout=i2av_layout if enable_state_action else "legacy",
+        num_pose_latent_frames=v5_layout.num_pose_latent_frames if v5_layout is not None else 0,
+        num_rgb_latent_frames=v5_layout.num_rgb_latent_frames if v5_layout is not None else 0,
+        chunk_token_count=v5_layout.chunk_token_count if v5_layout is not None else 0,
+        pose_pixel_frames=pose_pixel_frames if v5_layout is not None else 0,
+        rgb_pixel_frames=rgb_pixel_frames if v5_layout is not None else 0,
+        v5_layout=v5_layout.to_dict() if v5_layout is not None else None,
     )
+    if v5_layout is not None:
+        transformer._coaf_i2av_v5_layout = v5_layout  # noqa: SLF001
     transformer._coaf_causal_meta = meta  # noqa: SLF001
     return meta
 
