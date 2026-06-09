@@ -25,7 +25,7 @@ def main() -> None:
     parser.add_argument(
         "--test-root",
         type=Path,
-        default=Path("/project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/coaf_dataset_test"),
+        default=Path("/project/mscaisuperpod/sunkai/Casual_CoAF/coaf_dataset_test"),
     )
     parser.add_argument("--output-root", type=Path, required=True)
     parser.add_argument("--max-samples", type=int, default=1000)

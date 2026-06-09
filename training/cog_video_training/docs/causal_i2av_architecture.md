@@ -420,4 +420,42 @@ L = L_{\text{text}} + L_{s0} + F_{\text{latent}} \times (P + K)
 
 ---
 
+## 14. v5 Chunked I2AV 更新
+
+v5 将 49 帧视频解释为 **25 reason + 24 RGB**。CogVideoX causal VAE 的时间压缩使 reason/RGB 边界落在 latent `L6|L7`，因此 visual token 被分为：
+
+- `F_pose = (pose_pixel_frames - 1) // 4 + 1`
+- `F_rgb = F_total - F_pose`
+- `P = patches_per_latent_frame(...)`，由 `CogVideoXTransformer3D.config.patch_size`、VAE spatial scale 与训练分辨率动态计算
+
+序列长度不再硬编码：
+
+```text
+L_cond = max_text_seq_length + s0_cond_tokens
+L_video = F_pose * (P + chunk_token_count) + F_rgb * P
+```
+
+首帧 RGB 仍使用 CogVideoX-I2V 的通道 concat 条件：它不作为 self-attention 序列中的独立 token。
+
+### 14.1 Joint Attention 而非 attn2
+
+当前 diffusers 的 `CogVideoXBlock` 只有联合 `attn1`，没有独立 `attn2`。因此 Text/S0 与 video 的关系全部在 `attn1` processor 中处理：
+
+| Query | 可见 Key | 因果性 |
+|-------|----------|--------|
+| Text/S0 | Text/S0 | 非因果，全互见 |
+| Text/S0 | video | 不可见，防未来泄漏 |
+| `P_k` | 条件 + 历史 pose/chunk + `P_k` | 因果，不可见同块 `c_k` |
+| `c_k` | 条件 + 历史 pose/chunk + `P_k` + `c_k` | 块间因果，块内双向 |
+| RGB 段 | 条件 + 全部 pose/chunk + 全部 RGB | 规划后渲染，RGB 段内非因果 |
+
+实现入口：
+
+- `i2av_layout.py`：`I2AVV5Layout` 与动态 layout 推导
+- `i2av_forward.py`：`forward_i2av_v5_transformer`
+- `causal_attention.py`：`CogVideoXI2AVV5CausalAttnProcessor2_0`
+- `state_action.py`：`ChunkedStateActionTokenizer`
+
+---
+
 *文档版本：与 `Casual_CoAF/training/cog_video_training` 代码库同步，主配置为 CogVideoX-5B-I2V + v1/v4 49 帧训练。*

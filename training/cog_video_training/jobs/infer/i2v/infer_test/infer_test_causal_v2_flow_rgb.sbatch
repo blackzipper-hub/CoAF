@@ -6,29 +6,22 @@
 #SBATCH --mem=240G
 #SBATCH --time=48:00:00
 #SBATCH --partition=normal
-#SBATCH --account=llmsvgen
-#SBATCH --output=/project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/logs/infer/i2v/infer_test/%x-%j.out
-#SBATCH --error=/project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/logs/infer/i2v/infer_test/%x-%j.err
+#SBATCH --account=mscaisuperpod
+#SBATCH --output=/project/mscaisuperpod/sunkai/Casual_CoAF/training/cog_video_training/logs/infer/i2v/infer_test/%x-%j.out
+#SBATCH --error=/project/mscaisuperpod/sunkai/Casual_CoAF/training/cog_video_training/logs/infer/i2v/infer_test/%x-%j.err
 
 # Test-set inference for v2_flow_rgb causal I2V LoRA.
 
 set -euo pipefail
 
 module purge
-source /project/llmsvgen/yazhoux/miniconda3/etc/profile.d/conda.sh
-conda activate coaf_train
-
-CASUAL_ROOT=/project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training
-COAF_ROOT=/project/llmsvgen/sunkai/robomaster_3d/CoAF/training/cog_video_training
-TEST_ROOT=/project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/coaf_dataset_test
+source /project/mscaisuperpod/sunkai/Casual_CoAF/training/cog_video_training/scripts/cluster_env.sh
+CASUAL_ROOT=/project/mscaisuperpod/sunkai/Casual_CoAF/training/cog_video_training
+COAF_ROOT=/project/mscaisuperpod/sunkai/Casual_CoAF/training/cog_video_training
+TEST_ROOT=/project/mscaisuperpod/sunkai/Casual_CoAF/coaf_dataset_test
 cd "${CASUAL_ROOT}"
 mkdir -p logs/infer/i2v/infer_test outputs/infer/i2v/test outputs/infer/i2v/test_manifests
 
-export HF_HOME="${COAF_ROOT}/.cache/huggingface"
-export TRANSFORMERS_CACHE="${COAF_ROOT}/.cache/huggingface/transformers"
-export HF_DATASETS_CACHE="${COAF_ROOT}/.cache/huggingface/datasets"
-export TOKENIZERS_PARALLELISM=false
-export PYTHONNOUSERSITE=1
 
 export MODEL_PATH="${COAF_ROOT}/models/CogVideoX-5b-I2V"
 export DATA_ROOT="${CASUAL_ROOT}/outputs/infer/i2v/test_manifests/coaf_dataset_test_1k"

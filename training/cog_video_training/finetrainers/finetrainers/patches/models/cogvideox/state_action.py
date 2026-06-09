@@ -230,6 +230,46 @@ def align_trajectory_steps(seq: torch.Tensor, target_steps: int) -> torch.Tensor
     return seq[:, :target_steps]
 
 
+def get_action_norm_method(action_norm_stats: dict[str, torch.Tensor]) -> str:
+    method = action_norm_stats.get("norm_method", "mean_std")
+    if isinstance(method, torch.Tensor):
+        method = method.item()
+    if isinstance(method, bytes):
+        method = method.decode("utf-8")
+    return str(method)
+
+
+def normalize_raw_action(
+    action: torch.Tensor,
+    action_norm_stats: dict[str, torch.Tensor],
+    *,
+    gripper_continuous: bool = False,
+) -> torch.Tensor:
+    method = get_action_norm_method(action_norm_stats)
+    gripper_threshold = float(action_norm_stats.get("gripper_threshold", 0.5))
+    action_gt = torch.empty_like(action)
+
+    if method == "quantile":
+        q01 = action_norm_stats["q01"].to(action.device, dtype=action.dtype)
+        q99 = action_norm_stats["q99"].to(action.device, dtype=action.dtype)
+        denom = (q99 - q01).clamp_min(1e-6)
+        action_dims = 7 if gripper_continuous else 6
+        action_gt[..., :action_dims] = (action[..., :action_dims] - q01[:action_dims]) / denom[:action_dims] * 2.0 - 1.0
+        clip_value = float(action_norm_stats.get("clip", 1.5))
+        action_gt[..., :action_dims] = action_gt[..., :action_dims].clamp(-clip_value, clip_value)
+    elif method == "mean_std":
+        action_mean = action_norm_stats["mean"].to(action.device, dtype=action.dtype)
+        action_std = action_norm_stats["std"].to(action.device, dtype=action.dtype).clamp_min(1e-6)
+        action_dims = 7 if gripper_continuous else 6
+        action_gt[..., :action_dims] = (action[..., :action_dims] - action_mean[:action_dims]) / action_std[:action_dims]
+    else:
+        raise ValueError(f"Unsupported action norm method: {method}")
+
+    if not gripper_continuous:
+        action_gt[..., 6] = (action[..., 6] >= gripper_threshold).to(action_gt.dtype)
+    return action_gt
+
+
 def prepare_raw_action_gt_chunked(
     state_seq: torch.Tensor,
     action_seq: torch.Tensor,
@@ -242,9 +282,11 @@ def prepare_raw_action_gt_chunked(
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, int]:
     """Prepare normalized state and raw-action targets for v5 chunked training.
 
-    The returned action target uses normalized raw action for d0-d5 and binary
-    gripper labels for d6. State deltas are returned separately for auxiliary
-    consistency loss and must not be treated as action labels.
+    The returned action target uses normalized raw action for d0-d5. When
+    ``gripper_continuous`` is enabled, d6 is normalized with the same action
+    stats; otherwise d6 remains a binary gripper label. State deltas are
+    returned separately for auxiliary consistency loss and must not be treated
+    as action labels.
     """
     if steps_per_chunk is None:
         steps_per_chunk = 4
@@ -253,17 +295,12 @@ def prepare_raw_action_gt_chunked(
 
     state_mean = state_norm_stats["mean"].to(state_seq.device, dtype=state_seq.dtype)
     state_std = state_norm_stats["std"].to(state_seq.device, dtype=state_seq.dtype)
-    action_mean = action_norm_stats["mean"].to(action_seq.device, dtype=action_seq.dtype)
-    action_std = action_norm_stats["std"].to(action_seq.device, dtype=action_seq.dtype).clamp_min(1e-6)
-    gripper_threshold = float(action_norm_stats.get("gripper_threshold", 0.5))
-
     state_gt = (state_aligned - state_mean) / state_std
-    action_gt = torch.empty_like(action_aligned)
-    action_gt[..., :6] = (action_aligned[..., :6] - action_mean[:6]) / action_std[:6]
-    if gripper_continuous:
-        action_gt[..., 6] = (action_aligned[..., 6] - action_mean[6]) / action_std[6]
-    else:
-        action_gt[..., 6] = (action_aligned[..., 6] >= gripper_threshold).to(action_gt.dtype)
+    action_gt = normalize_raw_action(
+        action_aligned,
+        action_norm_stats,
+        gripper_continuous=gripper_continuous,
+    )
 
     delta = state_aligned[:, 1:] - state_aligned[:, :-1]
     delta = F.pad(delta, (0, 0, 0, 1), value=0.0)

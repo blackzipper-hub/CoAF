@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-COAF_ROOT="/project/llmsvgen/sunkai/robomaster_3d/CoAF/training/cog_video_training"
-CASUAL_ROOT="/project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training"
-MODEL_PATH="${MODEL_PATH:-${COAF_ROOT}/models/CogVideoX-5b-I2V}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck disable=SC1091
+source "${SCRIPT_DIR}/cluster_env.sh"
+
 DATA_ROOT="${DATA_ROOT:?DATA_ROOT must be set}"
 CHECKPOINT_DIR="${CHECKPOINT_DIR:?CHECKPOINT_DIR must be set}"
 INFER_OUTPUT_DIR="${INFER_OUTPUT_DIR:?INFER_OUTPUT_DIR must be set}"

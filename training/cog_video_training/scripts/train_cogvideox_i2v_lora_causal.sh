@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-COAF_ROOT="/project/llmsvgen/sunkai/robomaster_3d/CoAF/training/cog_video_training"
-CASUAL_ROOT="/project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck disable=SC1091
+source "${SCRIPT_DIR}/cluster_env.sh"
+
 FINETRAINERS_ROOT="${CASUAL_ROOT}/finetrainers"
 LEGACY_COGVIDEOX_ROOT="${FINETRAINERS_ROOT}/examples/_legacy/training/cogvideox"
-ACCELERATE_CONFIG_DIR="${COAF_ROOT}/finetrainers/accelerate_configs"
-MODEL_PATH="${MODEL_PATH:-${COAF_ROOT}/models/CogVideoX-5b-I2V}"
+ACCELERATE_CONFIG_DIR="${ACCELERATE_CONFIG_DIR:-${CASUAL_ROOT}/finetrainers/accelerate_configs}"
 DATA_ROOT="${DATA_ROOT:?DATA_ROOT must be set}"
 OUTPUT_DIR="${OUTPUT_DIR:?OUTPUT_DIR must be set}"
 

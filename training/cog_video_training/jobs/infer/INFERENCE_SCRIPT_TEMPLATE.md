@@ -25,17 +25,13 @@ Start from a nearby working sbatch script and keep these sections:
 #SBATCH --mem=240G
 #SBATCH --time=04:00:00
 #SBATCH --partition=normal
-#SBATCH --account=llmsvgen
-#SBATCH --output=/project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/logs/infer/<task_type>/%x-%j.out
-#SBATCH --error=/project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training/logs/infer/<task_type>/%x-%j.err
+#SBATCH --account=mscaisuperpod
+#SBATCH --output=/project/mscaisuperpod/sunkai/Casual_CoAF/training/cog_video_training/logs/infer/<task_type>/%x-%j.out
+#SBATCH --error=/project/mscaisuperpod/sunkai/Casual_CoAF/training/cog_video_training/logs/infer/<task_type>/%x-%j.err
 
 set -euo pipefail
 module purge
-source /project/llmsvgen/yazhoux/miniconda3/etc/profile.d/conda.sh
-conda activate coaf_train
-
-CASUAL_ROOT=/project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/training/cog_video_training
-COAF_ROOT=/project/llmsvgen/sunkai/robomaster_3d/CoAF/training/cog_video_training
+source /project/mscaisuperpod/sunkai/Casual_CoAF/training/cog_video_training/scripts/cluster_env.sh
 cd "${CASUAL_ROOT}"
 mkdir -p logs/infer/<task_type> outputs/infer/<task_type>
 
@@ -145,7 +141,7 @@ export SEED="${SEED:-42}"
 For test-set inference, use the test dataset and default to the first 14 samples:
 
 ```bash
-export DATA_ROOT=/project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/coaf_dataset_test
+export DATA_ROOT=/project/mscaisuperpod/sunkai/Casual_CoAF/coaf_dataset_test
 export NUM_SAMPLES="${NUM_SAMPLES:-14}"
 ```
 
@@ -188,7 +184,7 @@ state_path: state/state.npy
 action_path: action/action.npy
 ```
 
-This keeps the same inference code working for both training validation data and `/project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/coaf_dataset_test`.
+This keeps the same inference code working for both training validation data and `/project/mscaisuperpod/sunkai/Casual_CoAF/coaf_dataset_test`.
 
 ## Action Trajectory Outputs
 
@@ -235,8 +231,8 @@ Before submitting a full job:
 ```bash
 export MODEL_NAME="i2av_v5_depth_rgb_2524"
 export MODEL_PATH="${COAF_ROOT}/models/CogVideoX-5b-I2V"
-export DATA_ROOT=/project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/coaf_dataset_test
-export STATE_NORM_STATS=/project/llmsvgen/sunkai/robomaster_3d/Casual_CoAF/coaf_dataset_24_25/state_norm_stats.pt
+export DATA_ROOT=/project/mscaisuperpod/sunkai/Casual_CoAF/coaf_dataset_test
+export STATE_NORM_STATS=/project/mscaisuperpod/sunkai/Casual_CoAF/coaf_dataset_24_25/state_norm_stats.pt
 
 export HEIGHT=256 WIDTH=256 FPS=8 MAX_NUM_FRAMES=49
 export I2AV_LAYOUT=v5 POSE_PIXEL_FRAMES=25 RGB_PIXEL_FRAMES=24

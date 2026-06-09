@@ -25,6 +25,7 @@ from finetrainers.patches.models.cogvideox.state_action import (
     ChunkedStateActionTokenizer,
     S0Encoder,
     StateActionTokenizer,
+    get_action_norm_method,
     load_state_action_modules,
     prepare_gt,
     prepare_gt_chunked,
@@ -610,14 +611,29 @@ def run_i2av_sample(
     pred_state = pred_state_norm.float() * std + mean
     action_norm_stats = getattr(args, "action_norm_stats_payload", None)
     if action_norm_stats is not None:
-        action_mean = action_norm_stats["mean"].to(device=device, dtype=torch.float32)
-        action_std = action_norm_stats["std"].to(device=device, dtype=torch.float32).clamp_min(1e-6)
         pred_action = torch.empty_like(pred_action_norm.float())
-        pred_action[..., :6] = pred_action_norm.float()[..., :6] * action_std[:6] + action_mean[:6]
-        if args.gripper_continuous_action:
-            pred_action[..., 6] = pred_action_norm.float()[..., 6] * action_std[6] + action_mean[6]
+        action_norm_method = get_action_norm_method(action_norm_stats)
+        if action_norm_method == "quantile":
+            action_q01 = action_norm_stats["q01"].to(device=device, dtype=torch.float32)
+            action_q99 = action_norm_stats["q99"].to(device=device, dtype=torch.float32)
+            action_span = (action_q99 - action_q01).clamp_min(1e-6)
+            if args.gripper_continuous_action:
+                pred_action = (pred_action_norm.float() + 1.0) * 0.5 * action_span + action_q01
+            else:
+                pred_action[..., :6] = pred_action_norm.float()[..., :6] * 0.5 * action_span[:6] + (
+                    action_q01[:6] + action_span[:6] * 0.5
+                )
+                pred_action[..., 6] = torch.sigmoid(pred_action_norm.float()[..., 6])
+        elif action_norm_method == "mean_std":
+            action_mean = action_norm_stats["mean"].to(device=device, dtype=torch.float32)
+            action_std = action_norm_stats["std"].to(device=device, dtype=torch.float32).clamp_min(1e-6)
+            pred_action[..., :6] = pred_action_norm.float()[..., :6] * action_std[:6] + action_mean[:6]
+            if args.gripper_continuous_action:
+                pred_action[..., 6] = pred_action_norm.float()[..., 6] * action_std[6] + action_mean[6]
+            else:
+                pred_action[..., 6] = torch.sigmoid(pred_action_norm.float()[..., 6])
         else:
-            pred_action[..., 6] = torch.sigmoid(pred_action_norm.float()[..., 6])
+            raise ValueError(f"Unsupported action norm method: {action_norm_method}")
     else:
         pred_action = pred_action_norm.float() * std
     if gt_video_frames is not None:
