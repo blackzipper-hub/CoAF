@@ -14,18 +14,25 @@ from huggingface_hub import HfApi
 DEFAULT_DATASET_DIR = Path(
     "/project/mscaisuperpod/sunkai/Casual_CoAF/coaf_dataset_24_25"
 )
-DEFAULT_REPO_ID = "BlackZipper/CoAF_dataset"
+DEFAULT_REPO_ID = "BlackZipper/coaf_dataset_24_25"
 DEFAULT_TOKEN_STORE = Path("/project/llmsvgen/yazhou/huggingface/stored_tokens")
+DEFAULT_IGNORE_PATTERNS = (
+    ".cache/**",
+    "**/.cache/**",
+    "composed/v4_depth_rgb_load_tensors_smoke/**",
+)
 
 
-def resolve_token() -> str | None:
+def resolve_token() -> str:
     if os.environ.get("HF_TOKEN"):
         return os.environ["HF_TOKEN"].strip()
 
     token_name = os.environ.get("HF_TOKEN_NAME", "123")
     token_store = Path(os.environ.get("HF_STORED_TOKENS", DEFAULT_TOKEN_STORE))
     if not token_store.is_file():
-        return None
+        raise FileNotFoundError(
+            f"HF token not set. Export HF_TOKEN or create token store: {token_store}"
+        )
 
     config = configparser.ConfigParser()
     config.read(token_store)
@@ -59,6 +66,7 @@ def main() -> int:
         repo_id=args.repo_id,
         repo_type=args.repo_type,
         folder_path=args.dataset_dir,
+        ignore_patterns=list(DEFAULT_IGNORE_PATTERNS),
         num_workers=args.num_workers,
         print_report=True,
         print_report_every=60,

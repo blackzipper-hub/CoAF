@@ -3,7 +3,7 @@
 #SBATCH --nodes=1
 #SBATCH --gpus=1
 #SBATCH --cpus-per-task=8
-#SBATCH --time=02:00:00
+#SBATCH --time=10:00:00
 #SBATCH --partition=normal
 #SBATCH --account=mscaisuperpod
 #SBATCH --output=/project/mscaisuperpod/sunkai/Casual_CoAF/training/cog_video_training/logs/train/i2av_pt/%x-%j.out
@@ -24,7 +24,7 @@ export ACTION_NORM_STATS=/project/mscaisuperpod/sunkai/Casual_CoAF/coaf_dataset_
 
 export HEIGHT=256 WIDTH=256 FPS=8 MAX_NUM_FRAMES=49 FRAME_BUCKETS=49
 export TRAIN_BATCH_SIZE=1 NUM_GPUS=1 GRADIENT_ACCUMULATION_STEPS=4
-export TRAIN_STEPS="${TRAIN_STEPS:-6000}" CHECKPOINTING_STEPS="${CHECKPOINTING_STEPS:-500}" CHECKPOINTS_TOTAL_LIMIT=14
+export TRAIN_STEPS="${TRAIN_STEPS:-15000}" CHECKPOINTING_STEPS="${CHECKPOINTING_STEPS:-500}" CHECKPOINTS_TOTAL_LIMIT=14
 export LR="${LR:-5e-5}" LR_WARMUP_STEPS="${LR_WARMUP_STEPS:-100}"
 export TRACKER_NAME=casual-coaf-i2av-pt-v5-depth-rgb-2524-stage2-sa-denoise-d6cont
 export I2AV_LAYOUT=v5 POSE_PIXEL_FRAMES=25 RGB_PIXEL_FRAMES=24

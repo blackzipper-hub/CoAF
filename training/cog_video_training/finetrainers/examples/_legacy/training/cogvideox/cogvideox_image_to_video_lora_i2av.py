@@ -1088,13 +1088,22 @@ def main(args):
                 if args.sa_denoise_loss:
                     if args.train_stage != "stage2":
                         raise RuntimeError("--sa_denoise_loss is currently intended for train_stage=stage2.")
-                    sa_loss_dict = compute_sa_denoise_loss(
+                    sa_clean_pred = scheduler.get_velocity(
                         sa_pred,
+                        noisy_sa.to(device=sa_pred.device, dtype=sa_pred.dtype),
+                        timesteps,
+                    )
+                    sa_loss_dict = compute_sa_denoise_loss(
+                        sa_clean_pred,
                         clean_sa.to(dtype=weight_dtype),
                         noise_sa.to(dtype=weight_dtype),
                         sa_tokenizer,
+                        state_gt=state_gt.to(dtype=weight_dtype),
+                        action_gt=action_gt.to(dtype=weight_dtype),
                         lambda_s=args.lambda_s,
                         lambda_a=args.lambda_a,
+                        lambda_decoded_state=args.lambda_decoded_state,
+                        lambda_decoded_action=args.lambda_decoded_action,
                     )
                 elif action_norm_stats is not None:
                     if state_delta_gt is None:
@@ -1229,6 +1238,10 @@ def main(args):
                 logs["L_delta_gt"] = sa_loss_dict["L_delta_gt"].detach().item()
             if "L_sa_denoise" in sa_loss_dict:
                 logs["L_sa_denoise"] = sa_loss_dict["L_sa_denoise"].detach().item()
+            if "L_decoded_state" in sa_loss_dict:
+                logs["L_decoded_state"] = sa_loss_dict["L_decoded_state"].detach().item()
+            if "L_decoded_action" in sa_loss_dict:
+                logs["L_decoded_action"] = sa_loss_dict["L_decoded_action"].detach().item()
             if loss_video_balanced is not None:
                 logs["loss_video_balanced"] = loss_video_balanced.detach().item()
             if loss_sa_balanced is not None:

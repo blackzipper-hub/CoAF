@@ -368,7 +368,8 @@ def run_i2av_sample(
 ) -> tuple[np.ndarray, np.ndarray, list[np.ndarray]]:
     device = pipe._execution_device
     dtype = pipe.transformer.dtype
-    do_cfg = args.guidance_scale > 1.0
+    sa_guidance_scale = args.sa_guidance_scale if args.sa_guidance_scale is not None else args.guidance_scale
+    do_cfg = args.guidance_scale > 1.0 or sa_guidance_scale > 1.0
     layout = None
     if args.i2av_layout == "v5":
         layout = compute_i2av_v5_layout(
@@ -547,7 +548,7 @@ def run_i2av_sample(
                 noise_uncond, noise_text = noise_pred.chunk(2)
                 noise_pred = noise_uncond + args.guidance_scale * (noise_text - noise_uncond)
                 sa_uncond, sa_text = sa_pred.chunk(2)
-                sa_pred = sa_uncond + args.guidance_scale * (sa_text - sa_uncond)
+                sa_pred = sa_uncond + sa_guidance_scale * (sa_text - sa_uncond)
 
             if args.infer_stage != "stage2":
                 scheduler_noise_pred = noise_pred.to(device=latents.device)
@@ -657,6 +658,12 @@ def main() -> None:
     parser.add_argument("--num_frames", type=int, default=49)
     parser.add_argument("--fps", type=int, default=8)
     parser.add_argument("--guidance_scale", type=float, default=6.0)
+    parser.add_argument(
+        "--sa_guidance_scale",
+        type=float,
+        default=None,
+        help="Classifier-free guidance scale for state/action tokens. Defaults to guidance_scale.",
+    )
     parser.add_argument("--num_inference_steps", type=int, default=50)
     parser.add_argument("--num_samples", type=int, default=1)
     parser.add_argument("--train_num_samples", type=int, default=0)

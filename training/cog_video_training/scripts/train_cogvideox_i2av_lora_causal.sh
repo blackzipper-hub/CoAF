@@ -186,6 +186,8 @@ fi
   --lambda_a "${LAMBDA_A:-1.0}" \
   --lambda_g "${LAMBDA_G:-1.0}" \
   --lambda_c "${LAMBDA_C:-0.5}" \
+  --lambda_decoded_state "${LAMBDA_DECODED_STATE:-0.0}" \
+  --lambda_decoded_action "${LAMBDA_DECODED_ACTION:-0.0}" \
   --sa_per_frame "${SA_PER_FRAME:-8}" \
   --s0_cond_tokens "${S0_COND_TOKENS:-4}" \
   --i2av_layout "${I2AV_LAYOUT:-legacy}" \

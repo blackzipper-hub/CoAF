@@ -375,6 +375,18 @@ def _get_training_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--lambda_g", type=float, default=1.0)
     parser.add_argument("--lambda_c", type=float, default=0.5)
     parser.add_argument(
+        "--lambda_decoded_state",
+        type=float,
+        default=0.0,
+        help="Optional decoded 7D state reconstruction weight for SA denoise training.",
+    )
+    parser.add_argument(
+        "--lambda_decoded_action",
+        type=float,
+        default=0.0,
+        help="Optional decoded 7D action reconstruction weight for SA denoise training.",
+    )
+    parser.add_argument(
         "--gripper_continuous_action",
         action="store_true",
         help="Treat action d6 as a continuous normalized action channel instead of a BCE gripper target.",
@@ -382,7 +394,7 @@ def _get_training_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--sa_denoise_loss",
         action="store_true",
-        help="Train stage2 SA tokens with diffusion noise prediction instead of decoded clean state/action regression.",
+        help="Train stage2 SA tokens with diffusion denoising instead of direct decoded clean state/action regression.",
     )
     parser.add_argument("--sa_per_frame", type=int, default=8)
     parser.add_argument("--s0_cond_tokens", type=int, default=4)

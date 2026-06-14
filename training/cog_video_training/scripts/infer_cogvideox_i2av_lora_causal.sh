@@ -86,6 +86,9 @@ fi
 if [[ "${SA_DENOISE_LOSS:-0}" == "1" ]]; then
   I2AV_EXTRA_ARGS+=(--sa_denoise_loss)
 fi
+if [[ -n "${SA_GUIDANCE_SCALE:-${ACTION_GUIDANCE_SCALE:-}}" ]]; then
+  I2AV_EXTRA_ARGS+=(--sa_guidance_scale "${SA_GUIDANCE_SCALE:-${ACTION_GUIDANCE_SCALE}}")
+fi
 if [[ -n "${POSE_PIXEL_FRAMES:-}" ]]; then
   I2AV_EXTRA_ARGS+=(--pose_pixel_frames "${POSE_PIXEL_FRAMES}")
 fi

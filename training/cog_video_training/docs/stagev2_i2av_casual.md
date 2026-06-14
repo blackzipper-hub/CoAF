@@ -24,7 +24,9 @@ Stage2 推理也应与训练一致：使用 GT video 编码得到 clean video la
 | raw action LoRA | `v5_depth_rgb_2524_stage2_raw_action_lora` | 解决 aux head 表达力不足 | BCE/二值 | transformer LoRA + aux | decoded clean raw action regression |
 | LingBot-style BCE | `v5_depth_rgb_2524_stage2_raw_action_lingbot` | 引入 mask/per-dim loss，降低维度平均稀释 | BCE/二值 | transformer LoRA + aux | decoded clean raw action regression |
 | LingBot-style d6 continuous | `v5_depth_rgb_2524_stage2_raw_action_lingbot_d6cont` | 避免 d6 二分类偏置/全 0 坍缩 | 连续 action 通道 | transformer LoRA + aux | decoded clean raw action regression |
-| SA denoise d6 continuous | `v5_depth_rgb_2524_stage2_sa_denoise_d6cont` | 将 SA 改成真正 denoising 目标 | 连续 action 通道 | transformer LoRA + aux | token-space noise prediction |
+| SA denoise d6 continuous | `v5_depth_rgb_2524_stage2_sa_denoise_d6cont` | 将 SA 改成真正 denoising 目标 | 连续 action 通道 | transformer LoRA + aux | token-space noise prediction（初版有 scheduler/decoder 不一致问题） |
+| SA denoise + quantile norm | `v5_depth_rgb_2524_stage2_sa_denoise_d6cont_qnt` | quantile 归一化 + v-pred clean SA token denoise | 连续 action 通道 | transformer LoRA + aux | token-space clean SA prediction |
+| **SA denoise qnt fix1（当前主线）** | `v5_depth_rgb_2524_stage2_sa_denoise_d6cont_qnt_fix1` | 在 qnt 基础上补 decoded action/state 辅助监督 + 推理 SA CFG 解耦 | 连续 action 通道 | transformer LoRA + aux | v-pred clean SA + decoded action/state loss |
 
 ## 1. 原始 Stage2：`stage2_v1`
 
@@ -310,26 +312,152 @@ pred_state, pred_action = sa_tokenizer.decode(sa_tokens)
 
 这使训练目标和推理流程一致：训练预测 SA noise，推理用 scheduler 逐步去噪。
 
-### 当前状态
+### 当前结论
 
-该版本是最新一版，目标是验证真正 denoising SA token 是否能解决 d0-d5 不如 zero baseline 的问题。训练脚本设置为：
+初版 `sa_denoise_d6cont` 在训练/推理目标对齐上存在问题：训练侧曾按 noise prediction 实现，但 CogVideoX scheduler 实际使用 v-prediction；推理侧也未完全按同一 denoise 语义采样。对比 `lingbot_d6cont`（checkpoint-2000）：
+
+| 指标 (validation, 14 ep) | lingbot_d6cont | denoise_d6cont |
+|---|---|---|
+| d0-d5 RMSE / zero | 1.15x | 1.21x |
+| d0-d5 corr | ≈ 0 | ≈ -0.05 |
+| d6 F1@0.5 | 0.70 | 0.78（但 pred_pos=1.0，偏置严重） |
+| pred_std / gt_std (d0-d5) | 0.53 | 0.18（动态被压得更低） |
+
+该路线说明：**仅把 loss 改成 token denoise 还不够，必须同时修正 v-pred 目标、decoded 监督与推理采样一致性**。后续 `qnt` / `fix1` 在此基础上继续迭代。
+
+## 7. SA Denoise + Quantile Norm：`stage2_sa_denoise_d6cont_qnt`
+
+相关脚本：
 
 ```text
-partition=preempt
-time=08:00:00
-TRAIN_STEPS=6000
-CHECKPOINTING_STEPS=500
+jobs/train/i2av_pt/train_i2av_pt_v5_depth_rgb_2524_stage2_sa_denoise_d6cont_qnt_6k_normal.sbatch
+jobs/infer/i2av_pt/infer_i2av_pt_v5_depth_rgb_2524_stage2_sa_denoise_d6cont_qnt.sbatch
+scripts/build_action_quantile_norm_stats.py
 ```
 
-需要重点观察：
+### 想解决的问题
+
+1. 原始 `action_norm_stats.pt`（mean/std）对小幅连续 action 的尺度不敏感，d0-d5 容易被低动态均值淹没。
+2. 初版 SA denoise 的 scheduler/decoder 目标不一致，需要统一到 v-pred clean SA token。
+
+### 训练逻辑
+
+在 `sa_denoise_d6cont` 基础上：
 
 ```text
-d0-d5 RMSE / zero 是否低于 1.0
-d0-d5 corr 是否明显高于 0
-pred std / gt std 是否不再过低
-d6 continuous F1 是否保持稳定
-state RMSE / zero 是否继续优于 zero
+ACTION_NORM_STATS = action_quantile_norm_stats.pt
+d0-d6: (x - q01) / (q99 - q01) * 2 - 1, clip 到 [-1.5, 1.5]
+SA_DENOISE_LOSS = 1
+GRIPPER_CONTINUOUS_ACTION = 1
+STAGE2_TRAIN_TRANSFORMER_LORA = 1
 ```
+
+loss 核心为 **v-pred clean SA token MSE**（state/action token 分开加权）：
+
+```text
+sa_output = scheduler.get_velocity(model_output, noisy_sa, timesteps)  # clean SA estimate
+L_sa_denoise = lambda_s * L_state_token + lambda_a * L_action_token
+```
+
+默认权重：`LAMBDA_S=1.0`, `LAMBDA_A=2.0`。
+
+### 全量训练 sweep 结论（validation, 14 test + 8 train）
+
+| checkpoint | d0-d5 RMSE/zero | d0-d5 corr | d6 F1@0.5 | 备注 |
+|---|---|---|---|---|
+| 2k | 1.42x | -0.056 | 0.61 | 早期仍输给 zero |
+| 3k | 1.21x | -0.039 | 0.61 | 略有改善 |
+| 6k | 1.12x | 0.003 | 0.75 | d6 最好阶段之一 |
+| 8.5k* | 1.12x | 0.045 | 0.28 | d6 开始坍缩 |
+| 10k | 1.33x | 0.055 | 0.33 | d0-d5 回退 |
+| 15k | 1.09x | 0.027 | 0.17 | d6 pred_pos 仅 8% |
+
+结论：
+
+1. quantile norm + v-pred denoise **比初版 denoise 和 lingbot 系列更稳定**，长训后 d0-d5 RMSE/zero 可压到约 1.09x，但仍**未稳定低于 1.0**。
+2. d0-d5 pooled corr 始终接近 0，说明全量数据上**方向/相位对齐仍失败**。
+3. d6 在中期（6k）表现最好，继续训练后出现**正例率坍缩**（15k 时几乎不预测 open）。
+
+## 8. SA Denoise QNT Fix1：`stage2_sa_denoise_d6cont_qnt_fix1`（当前主线）
+
+相关脚本：
+
+```text
+jobs/train/i2av_pt/train_i2av_pt_v5_depth_rgb_2524_stage2_sa_denoise_d6cont_qnt_fix1_6k_normal.sbatch
+jobs/infer/i2av_pt/infer_i2av_pt_v5_depth_rgb_2524_stage2_sa_denoise_d6cont_qnt_fix1.sbatch
+jobs/train/i2av_pt/train_i2av_pt_v5_depth_rgb_2524_stage2_sa_denoise_d6cont_qnt_fix1_one_sample_2k.sbatch
+jobs/infer/i2av_pt/infer_i2av_pt_v5_depth_rgb_2524_stage2_sa_denoise_d6cont_qnt_fix1_one_sample_2k.sbatch
+```
+
+### 想解决的问题
+
+`qnt` 虽然统一了 v-pred 目标，但仅有 token-space denoise 时，decoder 到 7D action 的梯度仍然偏弱，尤其 rotation 维几乎学不到；同时推理若沿用 video CFG scale，SA 分支容易被过引导。
+
+### 相对 `qnt` 的改动
+
+训练侧新增 decoded 辅助监督：
+
+```text
+L_sa = L_sa_denoise
+     + LAMBDA_DECODED_STATE  * L_decoded_state    # 默认 0.1
+     + LAMBDA_DECODED_ACTION * L_decoded_action   # 默认 1.0
+```
+
+其中 `L_decoded_action` 直接对 `sa_tokenizer.decode(sa_output)` 与 GT raw action（quantile norm 后）做 SmoothL1。
+
+推理侧将 SA CFG 与 video CFG 解耦：
+
+```text
+SA_GUIDANCE_SCALE = 1   # 默认不再用 video guidance_scale=6 过推 SA
+```
+
+其余保持：`SA_DENOISE_LOSS=1`, `GRIPPER_CONTINUOUS_ACTION=1`, quantile norm, transformer LoRA。
+
+### 全量训练结果（checkpoint-14500，validation 14 ep / train 8 ep）
+
+| 指标 | validation | train |
+|---|---|---|
+| d0-d5 RMSE / zero | **1.15x** | 1.28x |
+| d0-d5 corr (pooled) | **0.043** | 0.067 |
+| d6 corr | **0.579** | 0.678 |
+| d6 F1@0.5 | **0.839** | 0.801 |
+| d6 pred_pos / gt_pos | 0.77 / 0.64 | 0.84 / 0.57 |
+| 7D corr (pooled) | **0.802** | 0.858 |
+| state RMSE / zero | 0.85x | 1.23x |
+
+逐维 corr（validation）：
+
+| dim | d0 (x) | d1 (y) | d2 (z) | d3 (rx) | d4 (ry) | d5 (rz) | d6 (gripper) |
+|---|---|---|---|---|---|---|---|
+| corr | 0.14 | 0.19 | **0.35** | 0.07 | 0.02 | 0.01 | **0.58** |
+
+逐维 corr（train）：
+
+| dim | d0 | d1 | d2 | d3 | d4 | d5 | d6 |
+|---|---|---|---|---|---|---|---|
+| corr | 0.48 | **0.65** | 0.43 | 0.05 | 0.08 | 0.16 | 0.68 |
+
+fix1 阶段性结论：
+
+1. **d6 明显优于 qnt 长训版本**：F1 从 15k 的 0.17 恢复到 0.84，说明 decoded action 监督和 SA CFG 解耦有效。
+2. **xyz 有一定信号，rotation 几乎为零**：d0-d2 在 train 上 corr 可达 0.43-0.65，但 d3-d5 在 validation 上仅 0.01-0.07。
+3. **7D pooled corr 高但具有误导性**：主要由 d6 大尺度通道拉高；d0-d5 pooled corr 仍接近 0。
+4. **仍未稳定击败 zero baseline**：d0-d5 RMSE/zero ≈ 1.15x，说明全量训练下小幅平移动作仍未对齐。
+
+### One-sample 过拟合 sanity check（fix1, 2000 step, 256×256）
+
+在同一 `episode_000000` 上单独过拟合 2000 step，可验证 pipeline 本身具备学习能力：
+
+| 指标 | validation (1 ep) |
+|---|---|
+| d0-d5 corr | **0.733** |
+| d0-d5 RMSE / zero | **0.73x**（击败 zero） |
+| d3-d5 corr | **0.69 / 0.72 / 0.69** |
+| d6 corr | **0.808** |
+| d6 F1@0.5 | **0.842** |
+| 7D corr | **0.842** |
+
+这说明：**模型与数据管线可以过拟合单条样本，包括 rotation**；全量训练 rotation 差，更可能是 loss 设计、多样本信号稀释、或 rotation 监督权重不足，而不是架构完全学不动。
 
 ## 为什么 zero baseline 很强
 
@@ -353,8 +481,79 @@ d6 positive rate / F1
 
 ## 当前推荐结论
 
-1. `raw_action_lora` 不建议继续投入。继续训练后 d0-d5 和 d6 都没有稳定改善。
-2. `lingbot_bce` 对 d0-d5 有一定帮助，但 d6 BCE 出现全 0 坍缩，不适合作为最终路线。
-3. `lingbot_d6cont` 是 clean-regression 系列里最合理的版本，验证了 d6 应该作为连续 action 通道建模。
-4. 下一步重点应放在 `stage2_sa_denoise_d6cont`，因为它把 SA 从 decoded clean regression 改成和 diffusion/DiT 更一致的 denoising 目标，并配套修改了推理流程。
+1. `raw_action_lora` / `lingbot_bce` 不建议继续投入：前者长训后 d0-d5 恶化，后者 d6 BCE 全 0 坍缩。
+2. `lingbot_d6cont` 验证了 **d6 应作为连续 action 通道**，是 clean-regression 系列最合理基线。
+3. 初版 `sa_denoise_d6cont` 已过时：scheduler/decoder 不一致，且 pred 动态过低。
+4. **`sa_denoise_d6cont_qnt_fix1` 是当前主线**：d6 和 xyz 有可见改善，但全量数据上 d0-d5 仍未稳定击败 zero，rotation 几乎学不到。
+5. one-sample 过拟合实验证明 **pipeline 可学 rotation**；全量训练问题更可能在 loss/监督设计，而非模型容量。
+
+## 下一步可能方向
+
+按优先级排序：
+
+### P0：先把 fix1 训满并稳定评估
+
+```text
+resume fix1 到 15000 step
+固定 eval 协议：14 test + 8 train，报告 d0-d5 / per-dim corr / d6 F1 / pred_std
+```
+
+当前最新 checkpoint 为 `checkpoint-14500`（训练 job 在 step 14979 附近 TIMEOUT）。补完最后 500 step 后再做一次完整推理对比。
+
+### P1：针对 rotation 维加强监督
+
+观察：全量 fix1 上 d3-d5 corr ≈ 0，但 one-sample 可达 0.69-0.74。
+
+可尝试：
+
+```text
+per-dim loss weight: 提高 d3-d5 权重（如 3-5x）
+rotation-only auxiliary head 或单独 rotation decoder loss
+decoded action loss 从 SmoothL1 改成 per-dim weighted SmoothL1
+```
+
+### P2：Action-space 直接输出（参考 LingBot-VA）
+
+当前路径：`transformer → SA chunk tokens [B,7,8,3072] → MLP → 7D action`。
+
+LingBot-VA 直接在 action 空间做 flow/denoise，不经 3072-dim SA token decoder。计划中的改法是：
+
+```text
+noisy action [B,T,7] → chunk encoder → action tokens
+transformer → action tokens → velocity head → [B,T,7]
+loss: action velocity / x0 regression（绕过 SA token decode 瓶颈）
+```
+
+这有望让 rotation 监督更直接，减少 token decode 带来的信息损失。
+
+### P3：归一化与数据分布
+
+```text
+继续用 quantile norm（已优于 mean/std）
+检查 rotation 维在 q01/q99 压缩后是否过度平坦
+考虑 rotation 单独归一化或保留原始角度尺度
+```
+
+### P4：训练策略
+
+```text
+小样本过拟合 → 8-sample overfit → 再扩全量（验证 loss 改动是否有效）
+课程学习：先训 xyz+d6，再放开 rotation
+对比 SA_GUIDANCE_SCALE / LAMBDA_DECODED_ACTION 网格
+```
+
+### 暂不建议的方向
+
+- 单纯提高输入分辨率：已验证上采样不能改善 rotation，且会增加算力开销。
+- 回到 d6 BCE：已知会类别坍缩。
+- 仅增加训练步数而不改 loss：qnt 15k 已出现 d6 退化，说明长训不是万能药。
+
+## 指标文件索引
+
+```text
+outputs/infer/i2av_pt/lingbot_vs_denoise_compare_metrics.json
+outputs/infer/i2av_pt/quantile_sweep_compare_metrics.json
+outputs/infer/i2av_pt/fix1_14500_compare_metrics.json
+outputs/infer/i2av_pt/one_sample_overfit_2k_metrics.json
+```
 

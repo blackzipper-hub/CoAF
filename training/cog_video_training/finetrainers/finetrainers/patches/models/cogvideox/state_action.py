@@ -483,16 +483,23 @@ def compute_sa_denoise_loss(
     noise_sa: torch.Tensor,
     state_tokenizer: StateActionModule,
     *,
+    state_gt: torch.Tensor | None = None,
+    action_gt: torch.Tensor | None = None,
     lambda_s: float = 1.0,
     lambda_a: float = 1.0,
+    lambda_decoded_state: float = 0.0,
+    lambda_decoded_action: float = 0.0,
 ) -> dict[str, torch.Tensor]:
     """Train SA tokens as a diffusion denoising target in token space.
 
-    ``sa_output`` predicts the noise that was added to ``clean_sa``. The state
-    and action token groups are reported separately so stage2 logs still reveal
-    whether action tokens dominate the objective.
+    ``sa_output`` is expected to be a clean-token estimate. For CogVideoX
+    v-prediction training this should be produced from the model velocity with
+    ``scheduler.get_velocity(model_output, noisy_sa, timesteps)`` before calling
+    this function. The optional decoded losses directly supervise the final 7D
+    state/action heads used by inference.
     """
-    target = noise_sa.to(device=sa_output.device, dtype=sa_output.dtype)
+    del noise_sa  # Kept in the signature for compatibility with older callers.
+    target = clean_sa.to(device=sa_output.device, dtype=sa_output.dtype)
     token_loss = F.mse_loss(sa_output, target, reduction="none").mean(dim=-1)
 
     if hasattr(state_tokenizer, "chunk_token_count"):
@@ -508,14 +515,32 @@ def compute_sa_denoise_loss(
 
     l_consistency = sa_output.new_zeros(())
     l_gripper = sa_output.new_zeros(())
-    l_sa = lambda_s * state_token_loss + lambda_a * action_token_loss
+    l_sa_denoise = lambda_s * state_token_loss + lambda_a * action_token_loss
+
+    l_decoded_state = sa_output.new_zeros(())
+    l_decoded_action = sa_output.new_zeros(())
+    if lambda_decoded_state > 0.0 or lambda_decoded_action > 0.0:
+        if state_gt is None or action_gt is None:
+            raise ValueError("Decoded SA losses require state_gt and action_gt.")
+        pred_state, pred_action = state_tokenizer.decode(sa_output)
+        if lambda_decoded_state > 0.0:
+            l_decoded_state = F.mse_loss(pred_state, state_gt.to(device=pred_state.device, dtype=pred_state.dtype))
+        if lambda_decoded_action > 0.0:
+            l_decoded_action = F.smooth_l1_loss(
+                pred_action,
+                action_gt.to(device=pred_action.device, dtype=pred_action.dtype),
+            )
+
+    l_sa = l_sa_denoise + lambda_decoded_state * l_decoded_state + lambda_decoded_action * l_decoded_action
     return {
         "L_state": state_token_loss,
         "L_action": action_token_loss,
         "L_gripper": l_gripper,
         "L_consistency": l_consistency,
         "L_delta_gt": l_consistency,
-        "L_sa_denoise": l_sa,
+        "L_sa_denoise": l_sa_denoise,
+        "L_decoded_state": l_decoded_state,
+        "L_decoded_action": l_decoded_action,
         "L_sa": l_sa,
     }
 
